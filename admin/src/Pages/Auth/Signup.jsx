@@ -51,7 +51,7 @@ const createAccount = async (e) => {
             phone,
             country,
             password: newPassword,
-            role: "user"
+            role: "admin"
         });
         setUser(response.data.user);
         console.log("User registered successfully", response.data.user);
@@ -78,17 +78,17 @@ const createAccount = async (e) => {
         <div>
 
           <h1 className="text-6xl font-extrabold text-white mb-6">
-            BidNest
-          </h1>
+  BidNest Admin
+</h1>
 
-          <p className="text-2xl text-white/90 mb-8">
-            Buy • Sell • Bid
-          </p>
+<p className="text-2xl text-white/90 mb-8">
+  Admin Control Panel
+</p>
 
-          <p className="text-white/80 text-lg leading-8 max-w-md">
-            Create your BidNest account and start buying,
-            selling and participating in exciting auctions.
-          </p>
+<p className="text-white/80 text-lg leading-8 max-w-md">
+  Create an administrator account to manage auctions,
+  products, users, and monitor the complete BidNest platform.
+</p>
 
         </div>
 
@@ -100,13 +100,13 @@ const createAccount = async (e) => {
 
         <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-8 shadow-2xl my-auto">
 
-          <h2 className="text-4xl font-bold text-white text-center mb-2">
-            Create Account
-          </h2>
+         <h2 className="text-4xl font-bold text-white text-center mb-2">
+  Admin Login
+</h2>
 
-          <p className="text-slate-400 text-center mb-8">
-            Join BidNest today
-          </p>
+<p className="text-slate-400 text-center mb-8">
+  Login in to the Administrator Account
+</p>
 
           {/* Name */}
 

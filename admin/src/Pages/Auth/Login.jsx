@@ -11,16 +11,16 @@ const Login = () => {
         e.preventDefault();
 
         try{
-            const response = await axios.post('http://localhost:3000/api/v1/loginUser', {
+            const response = await axios.post('http://localhost:3000/api/v1/loginAdmin', {
                 email,
                 password
             });
 
-            alert("User Login Successfully");
+            alert("Admin Login Successfully");
             setEmail("");
             setPassword("");
         }catch(error){
-            alert("User Not Logged In", error)
+            alert("Admin Not Logged In", error)
         }
     }
   return (
@@ -56,12 +56,12 @@ const Login = () => {
         <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-8 shadow-2xl">
 
           <h2 className="text-4xl font-bold text-white text-center mb-2">
-            Welcome Back
-          </h2>
+  Admin Login
+</h2>
 
-          <p className="text-slate-400 text-center mb-8">
-            Login to your BidNest account
-          </p>
+<p className="text-slate-400 text-center mb-8">
+  Login in to the Administrator Account
+</p>
 
           {/* Email */}
 
@@ -114,14 +114,14 @@ const Login = () => {
           {/* Button */}
 
           <button onClick={login}
-            className="w-full bg-amber-500 hover:bg-amber-600 transition duration-300 text-white font-semibold py-3 rounded-xl"
+            className=" mt-5 w-full bg-amber-500 hover:bg-amber-600 transition duration-300 text-white font-semibold py-3 rounded-xl"
           >
             Sign In
           </button>
 
           {/* Signup */}
 
-          <p className="text-center text-slate-400 mt-6">
+          {/* <p className="text-center text-slate-400 mt-6">
 
             Don't have an account?{" "}
 
@@ -132,7 +132,7 @@ const Login = () => {
               Sign Up
             </Link>
 
-          </p>
+          </p> */}
 
         </div>
 

@@ -45,7 +45,7 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await User.findOne({email});
+        const user = await User.findOne({email, role: "user"});
         const isPasswordValid = await bycrypt.compare(password, user.password);
 
         if(!user && !isPasswordValid){
@@ -75,4 +75,39 @@ const loginUser = async (req, res) => {
 }
 
 
-module.exports = {registerUser, loginUser};
+const loginAdmin = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({email, role: "admin"});
+        const isPasswordValid = await bycrypt.compare(password, user.password);
+
+        if(!user && !isPasswordValid){
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Email or Password"
+            });
+        }
+
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
+            expiresIn: "2h"
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "User Logged In Successfully",
+            token: token
+        })
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: error.message
+        });
+    }
+}
+
+
+
+module.exports = {registerUser, loginUser, loginAdmin};
