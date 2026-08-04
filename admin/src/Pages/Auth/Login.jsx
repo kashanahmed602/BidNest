@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import { useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+    const navigate = useNavigate();
+    
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
@@ -19,6 +22,9 @@ const Login = () => {
             alert("Admin Login Successfully");
             setEmail("");
             setPassword("");
+            localStorage.setItem("token", response.data.token);
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+            navigate("/dashboard");
         }catch(error){
             alert("Admin Not Logged In", error)
         }
