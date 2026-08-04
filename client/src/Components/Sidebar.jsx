@@ -15,6 +15,13 @@ import {
 import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
+
+   const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+    }
+    
   return (
     <div className="w-72 bg-slate-900 border-r border-slate-800 min-h-screen">
 
@@ -88,7 +95,7 @@ const Sidebar = () => {
 
       <div className="absolute bottom-6 w-72 px-4">
 
-        <button className="flex items-center gap-3 w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg text-white justify-center">
+        <button onClick={logout} className="flex items-center gap-3 w-full bg-red-600 hover:bg-red-700 py-3 rounded-lg text-white justify-center">
 
           <LogOut size={20} />
 

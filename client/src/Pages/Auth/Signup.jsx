@@ -2,9 +2,12 @@ import { Link } from "react-router-dom";
 import { User, Mail, Phone, Globe, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from 'axios'
+import { useNavigate } from "react-router-dom";
 
 
 const Signup = () => {
+
+    const navigate = useNavigate();
 
     const [countries, setCountries] = useState([]);
     // const [name, setName] = useState('')
@@ -51,7 +54,8 @@ const createAccount = async (e) => {
             phone,
             country,
             password: newPassword,
-            role: "user"
+            role: "user",
+            status: "pending"
         });
         setUser(response.data.user);
         console.log("User registered successfully", response.data.user);
@@ -61,6 +65,8 @@ const createAccount = async (e) => {
         setCountry("");
         setPassword("");
         setConfirmPassword("");
+
+        navigate('/login');
 
     }catch(error){
         alert("Error registering user:", error);

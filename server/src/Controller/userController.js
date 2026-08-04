@@ -3,7 +3,7 @@ const bycrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const registerUser = async (req, res) => {
-    const { name, email, phone, country, password, role } = req.body;
+    const { name, email, phone, country, password, role, status } = req.body;
 
     try{
 
@@ -22,6 +22,7 @@ const registerUser = async (req, res) => {
         phone,
         country,
         role,
+        status,
         password: await bycrypt.hash(password, 10)
     })
 
@@ -62,7 +63,8 @@ const loginUser = async (req, res) => {
         res.status(200).json({
             success: true,
             message: "User Logged In Successfully",
-            token: token
+            token: token,
+            user:user
         })
 
     }catch(error){
@@ -109,5 +111,65 @@ const loginAdmin = async (req, res) => {
 }
 
 
+const getPendingUsers = async (req, res) => {
+    try {
+        const pendingUsers = await User.find({ status: "pending"});
 
-module.exports = {registerUser, loginUser, loginAdmin};
+        if(!pendingUsers){
+            return res.status(404).json({
+                success: false,
+                message: "No Pending Users Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Pending Users Fetched Successfully",
+            users: pendingUsers
+        });
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+}
+
+
+const updateStatus = async (req, res) => {
+    const {id} = req.params;
+    const {status} = req.body;
+
+    try{
+
+        const update = await User.findByIdAndUpdate(
+            id,
+            {status},
+            {new: true}
+        );
+
+        if(!update){
+            return res.status(404).json({
+                success: false,
+                message: "User Not Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User Updated Successfully",
+            user: update
+        });
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+}
+
+
+
+module.exports = {registerUser, loginUser, loginAdmin, getPendingUsers, updateStatus};

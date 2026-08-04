@@ -10,6 +10,9 @@ import MyBids from "./Pages/MyBids";
 import WonAuctions from "./Pages/WonAuctions";
 import Wishlist from "./Pages/Wishlist";
 import Profile from "./Pages/Profile"
+import PendingRequest from "./Components/PendingRequest";
+import AccountRejected from "./Components/RejectedRequest";
+import ProtectedRoute from "./Components/ProtectedRoute";
 
 function App() {
   return (
@@ -20,23 +23,27 @@ function App() {
 
       <Route path="/login" element={<Login />} />
 
-      {/* <Route path="/signup" element={<Signup />} /> */}
+      <Route path="/signup" element={<Signup />} />
+      
+      <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard/></ProtectedRoute>} />
 
-      <Route path="/dashboard" element={<ClientDashboard/>} />
-      <Route path="/marketplace" element={<Home/>}/>
+      <Route path="/marketplace" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
+      
+      <Route path='/auctions' element={<ProtectedRoute><LiveAuction/></ProtectedRoute>} />
+      
+      <Route path="/sell-product" element={<ProtectedRoute><SellProduct/></ProtectedRoute>} />
 
-      <Route path='/auctions' element={<LiveAuction/>} />
+      <Route path="my-bids" element={ <ProtectedRoute><MyBids/></ProtectedRoute>} />
 
-      <Route path="/sell-product" element={<SellProduct/>} />
+      <Route path="won-auctions" element={<ProtectedRoute><WonAuctions/> </ProtectedRoute>}/>
 
-      <Route path="my-bids" element={<MyBids/>} />
+      <Route path="wishlist" element={<ProtectedRoute><Wishlist/></ProtectedRoute>} />
 
-      <Route path="won-auctions" element={<WonAuctions/>}/>
+      <Route path="profile" element={<ProtectedRoute><Profile/></ProtectedRoute>}/>
 
-      <Route path="wishlist" element={<Wishlist/>}/>
-
-      <Route path="profile" element={<Profile/>}/>
-
+      <Route path="/pending-request" element={<ProtectedRoute><PendingRequest/> </ProtectedRoute>}/>
+      
+      <Route path="/account-rejected" element={<ProtectedRoute><AccountRejected/></ProtectedRoute>}/>
 
     </Routes>
 

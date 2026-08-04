@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import { useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
@@ -19,6 +21,26 @@ const Login = () => {
             alert("User Login Successfully");
             setEmail("");
             setPassword("");
+
+            const { token, user } = response.data;
+
+            console.log(token)
+            console.log(user)
+
+
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(user));
+
+            if(user.status === "approved"){
+            navigate("/dashboard");
+            }
+            else if(user.status === "pending"){
+            navigate("/pending-request");
+            }
+            else if(user.status === "rejected"){
+            navigate("/account-rejected");
+            }
+
         }catch(error){
             alert("User Not Logged In", error)
         }
