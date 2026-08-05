@@ -13,6 +13,7 @@ import Profile from "./Pages/Profile"
 import PendingRequest from "./Components/PendingRequest";
 import AccountRejected from "./Components/RejectedRequest";
 import ProtectedRoute from "./Components/ProtectedRoute";
+import MyProducts from "./Pages/MyProducts";
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
       
       <Route path='/auctions' element={<ProtectedRoute><LiveAuction/></ProtectedRoute>} />
       
-      <Route path="/sell-product" element={<ProtectedRoute><SellProduct/></ProtectedRoute>} />
+      {/* <Route path="/sell-product" element={<ProtectedRoute><SellProduct/></ProtectedRoute>} /> */}
 
       <Route path="my-bids" element={ <ProtectedRoute><MyBids/></ProtectedRoute>} />
 
@@ -44,6 +45,10 @@ function App() {
       <Route path="/pending-request" element={<ProtectedRoute><PendingRequest/> </ProtectedRoute>}/>
       
       <Route path="/account-rejected" element={<ProtectedRoute><AccountRejected/></ProtectedRoute>}/>
+
+      <Route path="/my-products" element={<ProtectedRoute><MyProducts/></ProtectedRoute>}/>
+
+
 
     </Routes>
 

@@ -2,36 +2,36 @@ import SidebarLayout from "../Layout/SidebarLayout";
 import axios from 'axios';
 import { useEffect, useState } from "react";
 
-const PendingUsers = () => {
+const ApprovedUsers = () => {
 
-  const [pendingUsers, setPendingUsers] = useState([]);
+  const [approvedUsers, setApprovedUsers] = useState([]);
 
-  const updateStatus = async (id, status) => {
-    try{
+//   const updateStatus = async (id, status) => {
+//     try{
 
-      const response = await axios.put(`http://localhost:3000/api/v1/updateStatus/${id}`,{
-        status
-      });
+//       const response = await axios.put(`http://localhost:3000/api/v1/updateStatus/${id}`,{
+//         status
+//       });
 
-      alert(`User ${status}`);
+//       alert(`User ${status}`);
 
-      window.location.reload(true);
+//       window.location.reload(true);
 
-    }catch(error){
+//     }catch(error){
 
-      alert(error)
+//       alert(error)
 
-    }
-  }
+//     }
+//   }
 
   useEffect(() => {
 
-    const fetchPendingUsers = async () => {
+    const fetchApprovedUsers = async () => {
 
     try{
-    const response = await axios.get("http://localhost:3000/api/v1/users?status=pending");
+    const response = await axios.get("http://localhost:3000/api/v1/users?status=approved");
 
-    setPendingUsers(response.data.users);
+    setApprovedUsers(response.data.users);
     console.log(response.data.users);
     }
     catch(error){
@@ -39,13 +39,13 @@ const PendingUsers = () => {
     }
   }
 
-  fetchPendingUsers();
+  fetchApprovedUsers();
 },[])
   return (
     <SidebarLayout>
 
       <h2 className="text-4xl font-bold text-white mb-8">
-        Pending Users
+        Approved Users
       </h2>
 
       <div className="bg-slate-900 border border-slate-700 rounded-xl p-6">
@@ -66,9 +66,9 @@ const PendingUsers = () => {
 
           <tbody>
 
-  {pendingUsers.length > 0 ? (
+  {approvedUsers.length > 0 ? (
 
-    pendingUsers.map((user) => (
+    approvedUsers.map((user) => (
 
     <tr
   key={user._id}
@@ -93,12 +93,12 @@ const PendingUsers = () => {
 
   <td className="text-center">
 
-    <button onClick={() => updateStatus(user._id, "approved")} className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded mr-2 text-white">
-      Approve
+    <button className="bg-green-600 hover:bg-green-700 px-3 py-1 rounded mr-2 text-white">
+      View
     </button>
 
-    <button onClick={() => updateStatus(user._id, "rejected")} className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white">
-      Reject
+    <button className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white">
+      Ban
     </button>
 
   </td>
@@ -131,4 +131,4 @@ const PendingUsers = () => {
   );
 };
 
-export default PendingUsers;
+export default ApprovedUsers;

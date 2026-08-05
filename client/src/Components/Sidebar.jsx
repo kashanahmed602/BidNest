@@ -54,10 +54,10 @@ const Sidebar = () => {
           Live Auctions
         </NavLink>
 
-        <NavLink to="/sell-product" className="sidebar-link">
+        {/* <NavLink to="/sell-product" className="sidebar-link">
           <PlusCircle size={20} />
           Sell Product
-        </NavLink>
+        </NavLink> */}
 
         <NavLink to="/my-products" className="sidebar-link">
           <Package size={20} />

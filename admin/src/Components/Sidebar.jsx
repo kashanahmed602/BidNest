@@ -41,6 +41,14 @@ const AdminSidebar = () => {
         </NavLink>
 
         <NavLink
+          to="/approved-users"
+          className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 p-3 rounded-lg"
+        >
+          <Users size={20} />
+          Approved Users
+        </NavLink>
+
+        <NavLink
           to="/pending-products"
           className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 p-3 rounded-lg"
         >

@@ -111,29 +111,32 @@ const loginAdmin = async (req, res) => {
 }
 
 
-const getPendingUsers = async (req, res) => {
-    try {
-        const pendingUsers = await User.find({ status: "pending"});
+const getUsers = async (req, res) => {
 
-        if(!pendingUsers){
-            return res.status(404).json({
-                success: false,
-                message: "No Pending Users Found"
-            });
-        }
+    const { status } = req.query;
+
+    try {
+
+        const users = await User.find({
+            role: "user",
+            status: status
+        });
 
         res.status(200).json({
             success: true,
-            message: "Pending Users Fetched Successfully",
-            users: pendingUsers
+            users
         });
-    }catch(error){
+
+    } catch (error) {
+
         res.status(500).json({
             success: false,
             message: "Internal Server Error"
         });
+
     }
-}
+
+};
 
 
 const updateStatus = async (req, res) => {
@@ -172,4 +175,4 @@ const updateStatus = async (req, res) => {
 
 
 
-module.exports = {registerUser, loginUser, loginAdmin, getPendingUsers, updateStatus};
+module.exports = {registerUser, loginUser, loginAdmin, getUsers, updateStatus};

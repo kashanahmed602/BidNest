@@ -7,6 +7,7 @@ import PendingUsers from "./Components/PendingUsers";
 import PendingProducts from "./Components/PendingProducts";
 import ApprovedProducts from "./Components/ApprovedProducts";
 import ProtectedRoute from "./Components/ProtectedRoutes"
+import ApprovedUsers from "./Components/ApprovedUsers";
 
 function App() {
   return (
@@ -42,6 +43,9 @@ function App() {
           <ApprovedProducts />
         </ProtectedRoute>
       } />
+
+      <Route path="/approved-users" element={<ProtectedRoute><ApprovedUsers/></ProtectedRoute>}/>
+
 
     </Routes>
 
