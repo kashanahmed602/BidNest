@@ -9,6 +9,7 @@ app.use(express.json());
 app.use("/api/v1", require("./Routes/userRoutes"));
 app.use("/api/v1", require("./Routes/countryRoutes"));
 app.use("/api/v1", require("./Routes/productRoutes"));
+app.use("/api/v1", require("./Routes/auctionRoutes"));
 
 
 module.exports = app;
