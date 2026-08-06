@@ -1,10 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SidebarLayout from "../Layout/SidebarLayout";
 import SellProductModal from "./SellProducts";
+import axios from 'axios'
+import { Trash2 } from "lucide-react";
 
 const MyProducts = () => {
 
     const [showModal, setShowModal] = useState(false);
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try{
+
+                const response = await axios.get('http://localhost:3000/api/v1/products');
+
+                setProducts(response.data.products);
+
+            }catch(error){
+                alert(error);
+            }
+        }
+
+        fetchProducts();
+    },[])
+
+    const deleteProduct = async (id) => {
+        try{
+            const response = await axios.delete(`http://localhost:3000/api/v1/productDeleted/${id}`);
+
+            alert("Product Deleted Successfully");
+            window.location.reload();
+
+        }catch(error){
+            alert(error);
+        }
+    }
 
     return (
 
@@ -27,37 +58,61 @@ const MyProducts = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                <div className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
+  {products.map((product) => (
 
-                    <img
-                        src="https://placehold.co/400x250"
-                        alt=""
-                        className="w-full h-52 object-cover"
-                    />
+    <div
+      key={product._id}
+      className="relative bg-slate-900 border border-slate-700 rounded-xl overflow-hidden"
+    >
 
-                    <div className="p-5">
+       {/* Delete Button */}
+  <button
+    onClick={() => deleteProduct(product._id)}
+    className="absolute top-3 right-3 z-10 bg-red-600 hover:bg-red-700 p-2 rounded-full shadow-lg transition"
+  >
+    <Trash2 size={18} className="text-white" />
+  </button>
 
-                        <h2 className="text-xl text-white font-semibold">
-                            iPhone 15 Pro
-                        </h2>
+      <img
+        src={product.image}
+        alt={product.name}
+        className="w-full h-52 object-cover"
+      />
 
-                        <p className="text-slate-400 mt-2">
-                            Starting Price
-                        </p>
+      <div className="p-5">
 
-                        <h3 className="text-amber-400 text-xl font-bold">
-                            $1200
-                        </h3>
+        <h2 className="text-xl text-white font-semibold">
+          {product.name}
+        </h2>
 
-                        <span className="inline-block mt-4 bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-sm">
-                            Pending Approval
-                        </span>
+        <p className="text-slate-400 mt-2">
+          Starting Price
+        </p>
 
-                    </div>
+        <h3 className="text-amber-400 text-xl font-bold">
+          PKR {product.price}
+        </h3>
 
-                </div>
+        <span
+          className={`inline-block mt-4 px-3 py-1 rounded-full text-sm
+            ${
+              product.status === "approved"
+                ? "bg-green-500/20 text-green-400"
+                : product.status === "rejected"
+                ? "bg-red-500/20 text-red-400"
+                : "bg-yellow-500/20 text-yellow-400"
+            }`}
+        >
+          {product.status}
+        </span>
 
-            </div>
+      </div>
+
+    </div>
+
+  ))}
+
+</div>
 
             {showModal && (
                 <SellProductModal closeModal={() => setShowModal(false)} />

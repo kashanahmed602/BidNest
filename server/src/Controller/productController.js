@@ -1,5 +1,6 @@
 const Product = require("../Models/productsModel");
-const imagekit = require("../Config/imageKit")
+const imagekit = require("../Config/imageKit");
+// const { findByIdAndDelete } = require("../Models/userModel");
 
 
 const createProduct = async (req, res) => {
@@ -25,6 +26,7 @@ const createProduct = async (req, res) => {
             price,
             category,
             quantity,
+            userId: req.user.id,
             image: uploadedImage.url
         });
 
@@ -45,22 +47,23 @@ const createProduct = async (req, res) => {
 };
 
 const getProducts = async (req, res) => {
-    try{
-        const products = await Product.find();
+    try {
 
-        if(!products){
-            return res.status(404).json({
-                success: false,
-                message: "No Product Found"
-            })
+        const filter = {};
+
+        if (req.query.status) {
+            filter.status = req.query.status;
         }
+
+        const products = await Product.find(filter)
+            .populate("userId", "name email");
 
         res.status(200).json({
             success: true,
-            products: products
+            products
         });
 
-    }catch(error){
+    } catch (error) {
 
         res.status(500).json({
             success: false,
@@ -70,5 +73,63 @@ const getProducts = async (req, res) => {
     }
 };
 
+const deleteProduct = async (req, res) => {
+    const { id } = req.params;
 
-module.exports = { createProduct, getProducts };
+    try{
+        const deleteItem = await Product.findByIdAndDelete(id);
+
+        if(!deleteItem){
+            return res.status(404).json({
+                success: false,
+                message: "Product Not Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Product Deleted Successfully"
+        });
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
+
+const updateStatusProducts = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    try{
+        const product = await Product.findByIdAndUpdate(id,
+            { status: status },
+            { new: true }
+        );
+
+        if(!product){
+            return res.status(404).json({
+                success: false,
+                message: "Product Not Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Product ${status} Successfully`,
+            product: product
+        });
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
+
+
+module.exports = { createProduct, getProducts, deleteProduct, updateStatusProducts };

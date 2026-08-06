@@ -1,10 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
-const {createProduct, getProducts } = require("../Controller/productController");
+const {createProduct, getProducts, deleteProduct, updateStatusProducts } = require("../Controller/productController");
 const upload = require("../Middleware/upload");
+const auth = require("../Middleware/auth");
 
-router.post("/createProduct",upload.single("image"), createProduct);
-router.get("/getProducts", getProducts);
+router.post("/createProduct",auth,upload.single("image"), createProduct);
+router.get("/products", getProducts);
+router.delete("/productDeleted/:id", deleteProduct);
+router.put("/updateStatusProducts/:id", updateStatusProducts);
+// router.get("/products", getPendingProducts);
 
 module.exports = router;

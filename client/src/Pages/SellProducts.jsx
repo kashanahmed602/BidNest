@@ -23,14 +23,18 @@ const SellProductModal = ({ closeModal }) => {
       formData.append("category", category);
       formData.append("image", image);    
     
-      const response = await axios.post("http://localhost:3000/api/v1/createProduct", 
-        formData,
-        {
-          headers:{
-            "Content-Type":  "multipart/form-data",
-          },
-        }
-      );
+      const token = localStorage.getItem("token");
+
+await axios.post(
+  "http://localhost:3000/api/v1/createProduct",
+  formData,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  }
+);
 
       alert("Product Created Successfully");
       setName('');
