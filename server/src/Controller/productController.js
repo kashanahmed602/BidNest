@@ -131,5 +131,35 @@ const updateStatusProducts = async (req, res) => {
     }
 };
 
+const getMarketPlaceProducts = async (req, res) => {
+    try{
 
-module.exports = { createProduct, getProducts, deleteProduct, updateStatusProducts };
+        const products = await Product.find({
+            userId: { $ne: req.user.id },
+            status: "approved"
+        });
+
+        if(!products){
+            return res.status(404).json({
+                success: false,
+                message: "No Products Found"
+            });
+        }
+
+        res.status(200).json({
+            success: false,
+            message: "Products Fetched Successfully",
+            products: products
+        });
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
+
+
+module.exports = { createProduct, getProducts, deleteProduct, updateStatusProducts, getMarketPlaceProducts };

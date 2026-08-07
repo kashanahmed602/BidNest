@@ -64,6 +64,14 @@ const AdminSidebar = () => {
           Approved Products
         </NavLink>
 
+         <NavLink
+          to="/pending-auctions"
+          className="flex items-center gap-3 text-slate-300 hover:bg-slate-800 p-3 rounded-lg"
+        >
+          <CheckCircle size={20} />
+          Pending Auctions
+        </NavLink>
+
       </nav>
 
       <button onClick={logout} className="mt-20 flex items-center gap-3 bg-red-600 hover:bg-red-700 w-full p-3 rounded-lg text-white">

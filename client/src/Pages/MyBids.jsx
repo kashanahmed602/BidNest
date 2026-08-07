@@ -23,11 +23,35 @@ const MyBids = () => {
     fetchAuctions();
   }, []);
 
+  // Format Date
+  const formatDate = (date) => {
+    if (!date) return "Not Set";
+
+    return new Date(date).toLocaleDateString("en-PK", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // Format Time
+  const formatTime = (date) => {
+    if (!date) return "Not Set";
+
+    return new Date(date).toLocaleTimeString("en-PK", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   return (
     <SidebarLayout>
+
       {/* Header */}
 
       <div className="flex justify-between items-center mb-8">
+
         <h1 className="text-4xl font-bold text-white">
           My Auctions
         </h1>
@@ -38,6 +62,7 @@ const MyBids = () => {
         >
           + Add Auction
         </button>
+
       </div>
 
       {/* Auctions */}
@@ -51,6 +76,8 @@ const MyBids = () => {
             className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden"
           >
 
+            {/* Image */}
+
             <img
               src={auction.image}
               alt={auction.name}
@@ -59,47 +86,95 @@ const MyBids = () => {
 
             <div className="p-5">
 
-              <h2 className="text-xl text-white font-semibold">
-                {auction.name}
-              </h2>
+  {/* Name + Start Date/Time */}
+  <div className="flex justify-between items-start gap-3">
 
-              <p className="text-slate-400 mt-3">
-                Starting Price
-              </p>
+    <h2 className="text-xl text-white font-semibold truncate">
+      {auction.name}
+    </h2>
 
-              <h3 className="text-amber-400 text-xl font-bold">
-                PKR {auction.startingPrice}
-              </h3>
+    <div className="text-right shrink-0">
+      <p className="text-slate-400 text-xs">
+        {auction.startDateTime
+          ? new Date(auction.startDateTime).toLocaleDateString("en-PK", {
+              day: "2-digit",
+              month: "short",
+            })
+          : "Not Set"}
+      </p>
 
-              <p className="text-slate-400 mt-4">
-                Current Bid
-              </p>
+      <p className="text-amber-400 text-xs">
+        {auction.startDateTime
+          ? new Date(auction.startDateTime).toLocaleTimeString("en-PK", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : ""}
+      </p>
+    </div>
 
-              <h3 className="text-green-400 text-lg font-semibold">
-                PKR {auction.currentBid}
-              </h3>
+  </div>
 
-              <div className="flex justify-between items-center mt-5">
+  {/* Starting Price */}
+  <p className="text-slate-400 mt-3">
+    Starting Price
+  </p>
 
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    auction.auctionStatus === "live"
-                      ? "bg-green-500/20 text-green-400"
-                      : auction.auctionStatus === "upcoming"
-                      ? "bg-yellow-500/20 text-yellow-400"
-                      : "bg-red-500/20 text-red-400"
-                  }`}
-                >
-                  {auction.auctionStatus}
-                </span>
+  <h3 className="text-amber-400 text-xl font-bold">
+    PKR {auction.startingPrice}
+  </h3>
 
-                <span className="text-slate-400 text-sm">
-                  {auction.duration} Hour Duration
-                </span>
+  {/* Current Bid */}
+  <p className="text-slate-400 mt-4">
+    Current Bid
+  </p>
 
-              </div>
+  <h3 className="text-green-400 text-lg font-semibold">
+    PKR {auction.currentBid}
+  </h3>
 
-            </div>
+  {/* Status + Approval + Duration */}
+  <div className="flex justify-between items-center mt-5">
+
+    <div>
+    {/* Auction Status */}
+    <span
+      className={`px-3 py-1 rounded-full text-sm ${
+        auction.auctionStatus === "live"
+          ? "bg-green-500/20 text-green-400"
+          : auction.auctionStatus === "upcoming"
+          ? "bg-yellow-500/20 text-yellow-400"
+          : "bg-red-500/20 text-red-400"
+      }`}
+    >
+      {auction.auctionStatus}
+    </span>
+
+    {/* Approval Status */}
+    <span
+      className={`px-3 py-1 rounded-full text-sm ${
+        auction.approvalStatus === "approved"
+          ? "bg-green-500/20 text-green-400"
+          : auction.approvalStatus === "rejected"
+          ? "bg-red-500/20 text-red-400"
+          : "bg-orange-500/20 text-orange-400"
+      }`}
+    >
+      {auction.approvalStatus}
+    </span>
+
+    </div>
+
+    {/* Duration */}
+    <div>
+    <span className="text-slate-400 text-sm">
+      {auction.duration}h
+    </span>
+    </div>
+
+  </div>
+
+</div>
 
           </div>
 
@@ -118,8 +193,14 @@ const MyBids = () => {
       {/* Modal */}
 
       {showModal && (
-        <AuctionModal closeModal={() => setShowModal(false)} />
+        <AuctionModal
+          closeModal={() => {
+            setShowModal(false);
+            fetchAuctions();
+          }}
+        />
       )}
+
     </SidebarLayout>
   );
 };
