@@ -6,7 +6,7 @@ const upload = require("../Middleware/upload");
 const auth = require("../Middleware/auth");
 
 router.post("/createAuction", auth, upload.single("image"), createAuction);
-router.get("/auctions", getAuctions);
+router.get("/auctions",auth, getAuctions);
 router.put("/auctionUpdate/:id", updateAuction);
 router.get("/marketAuctions", auth, marketAuctions);
 

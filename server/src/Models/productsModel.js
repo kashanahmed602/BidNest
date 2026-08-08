@@ -27,6 +27,13 @@ const productSchema = new mongoose.Schema({
         required: true
     },
 
+    gallery: [
+        {
+            type: String,
+            required: true
+        }
+    ],
+
     quantity: {
         type: Number,
         required: true

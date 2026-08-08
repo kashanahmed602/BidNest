@@ -5,8 +5,8 @@ const {createProduct, getProducts, deleteProduct, updateStatusProducts, getMarke
 const upload = require("../Middleware/upload");
 const auth = require("../Middleware/auth");
 
-router.post("/createProduct",auth,upload.single("image"), createProduct);
-router.get("/products", getProducts);
+router.post("/createProduct",auth,upload.fields([{name: "image", maxCount: 1}, {name: "gallery", maxCount: 5}]), createProduct);
+router.get("/products",auth, getProducts);
 router.delete("/productDeleted/:id", deleteProduct);
 router.put("/updateStatusProducts/:id", updateStatusProducts);
 router.get("/marketplaceProducts", auth, getMarketPlaceProducts);

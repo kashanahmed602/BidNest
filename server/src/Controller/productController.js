@@ -7,17 +7,27 @@ const createProduct = async (req, res) => {
 
     const { name, description, price, category, quantity } = req.body;
 
-    console.log("Controller Hit");
-    console.log(req.file);
-    console.log(req.body);
-
     try {
 
+        const mainImage = req.files.image[0]
+
         const uploadedImage = await imagekit.upload({
-            file: req.file.buffer,
-            fileName: req.file.originalname,
+            file: mainImage.buffer,
+            fileName: mainImage.originalname,
             folder: "/BidNest"
         });
+
+        const galleryImages = [];
+
+        for (const file of req.files.gallery || []){
+            const uploadGalleryImage = await imagekit.upload({
+                file: file.buffer,
+                fileName: file.originalname,
+                folder: "/Bidnest/gallery"
+            });
+
+            galleryImages.push(uploadGalleryImage.url);
+        }
 
 
         const newProduct = await Product.create({
@@ -27,7 +37,8 @@ const createProduct = async (req, res) => {
             category,
             quantity,
             userId: req.user.id,
-            image: uploadedImage.url
+            image: uploadedImage.url,
+            gallery: galleryImages
         });
 
         res.status(201).json({
@@ -49,14 +60,17 @@ const createProduct = async (req, res) => {
 const getProducts = async (req, res) => {
     try {
 
-        const filter = {};
+         const filter = {
+        userId: req.user.id
+        };
 
         if (req.query.status) {
             filter.status = req.query.status;
         }
 
-        const products = await Product.find(filter)
-            .populate("userId", "name email");
+
+
+        const products = await Product.find(filter).populate("userId", "name email");
 
         res.status(200).json({
             success: true,
@@ -67,7 +81,7 @@ const getProducts = async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Internal Server Error"
+            message: error.message
         });
 
     }

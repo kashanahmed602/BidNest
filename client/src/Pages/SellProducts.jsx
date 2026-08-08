@@ -11,6 +11,7 @@ const SellProductModal = ({ closeModal }) => {
   const [quantity, setQuantity] = useState('');
   const [category, setCategory] = useState('');
   const [image, setImage] = useState(null);
+  const [gallery, setGallery] = useState([]);
 
   const createProduct = async () => {
     try{
@@ -22,6 +23,10 @@ const SellProductModal = ({ closeModal }) => {
       formData.append("quantity", quantity);
       formData.append("category", category);
       formData.append("image", image);    
+
+      gallery.forEach((file) => {
+        formData.append("gallery", file);
+      })
     
       const token = localStorage.getItem("token");
 
@@ -43,6 +48,7 @@ await axios.post(
       setCategory('');
       setQuantity('');
       setImage(null);
+      setGallery([]);
 
       if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -168,6 +174,15 @@ await axios.post(
     onChange={(e) => setImage(e.target.files[0])}
     className="bg-slate-800 p-3 rounded-lg text-white"
 />
+
+        <input
+
+        type="file"
+        accept='image/*'
+        multiple
+        onChange={(e) => setGallery(Array.from(e.target.files))}
+        className="bg-slate-800 p-3 rounded-lg text-white"
+        />
 
                     <div className="flex justify-end gap-3">
 

@@ -13,7 +13,11 @@ const MyProducts = () => {
         const fetchProducts = async () => {
             try{
 
-                const response = await axios.get('http://localhost:3000/api/v1/products');
+                const response = await axios.get('http://localhost:3000/api/v1/products',{
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  }
+                });
 
                 setProducts(response.data.products);
 

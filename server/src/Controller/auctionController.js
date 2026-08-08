@@ -40,7 +40,9 @@ const createAuction = async (req, res) => {
 
 const getAuctions = async (req, res) => {
     try{
-        const filter = {};
+        const filter = {
+            sellerId: req.user.id
+        };
 
         if(req.query.status){
             filter.status = req.query.status
