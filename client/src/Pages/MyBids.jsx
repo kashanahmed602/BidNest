@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import SidebarLayout from "../Layout/SidebarLayout";
 import AuctionModal from "../Components/auctiomModal";
 import axios from "axios";
+import { Trash2 } from "lucide-react";
+
 
 const MyBids = () => {
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +28,22 @@ const MyBids = () => {
   useEffect(() => {
     fetchAuctions();
   }, []);
+
+  const delteAuction = async (id) => {
+    try{
+      const response = await axios.delete(`http://localhost:3000/api/v1/deletAuction/${id}`,{
+        headers: {
+           Authorization: `Bearer ${localStorage.getItem("token")}`,
+          }
+      });
+
+      alert("Auction deleted Successfully");
+      window.location.reload(true);
+
+    }catch(error){
+      alert("Error: ", error.message);
+    }
+  }
 
   // Format Date
   const formatDate = (date) => {
@@ -76,111 +94,114 @@ const MyBids = () => {
         {auctions.map((auction) => (
 
           <div
-            key={auction._id}
-            className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden"
-          >
+  key={auction._id}
+  className="relative bg-slate-900 border border-slate-700 rounded-xl overflow-hidden"
+>
 
-            {/* Image */}
+  {/* Delete Button */}
+  <button onClick={() => delteAuction(auction._id)}
+    className="absolute top-3 right-3 z-10 bg-red-600 hover:bg-red-700 p-2 rounded-full shadow-lg transition"
+  >
+    <Trash2 size={18} className="text-white" />
+  </button>
 
-            <img
-              src={auction.image}
-              alt={auction.name}
-              className="w-full h-52 object-cover"
-            />
+  {/* Image */}
+  <img
+    src={auction.image}
+    alt={auction.name}
+    className="w-full h-52 object-cover"
+  />
 
-            <div className="p-5">
+  <div className="p-5">
 
-  {/* Name + Start Date/Time */}
-  <div className="flex justify-between items-start gap-3">
+    {/* Name + Start Date/Time */}
+    <div className="flex justify-between items-start gap-3">
 
-    <h2 className="text-xl text-white font-semibold truncate">
-      {auction.name}
-    </h2>
+      <h2 className="text-xl text-white font-semibold truncate">
+        {auction.name}
+      </h2>
 
-    <div className="text-right shrink-0">
-      <p className="text-slate-400 text-xs">
-        {auction.startDateTime
-          ? new Date(auction.startDateTime).toLocaleDateString("en-PK", {
-              day: "2-digit",
-              month: "short",
-            })
-          : "Not Set"}
-      </p>
+      <div className="text-right shrink-0">
+        <p className="text-slate-400 text-xs">
+          {auction.startDateTime
+            ? new Date(auction.startDateTime).toLocaleDateString("en-PK", {
+                day: "2-digit",
+                month: "short",
+              })
+            : "Not Set"}
+        </p>
 
-      <p className="text-amber-400 text-xs">
-        {auction.startDateTime
-          ? new Date(auction.startDateTime).toLocaleTimeString("en-PK", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : ""}
-      </p>
-    </div>
-
-  </div>
-
-  {/* Starting Price */}
-  <p className="text-slate-400 mt-3">
-    Starting Price
-  </p>
-
-  <h3 className="text-amber-400 text-xl font-bold">
-    PKR {auction.startingPrice}
-  </h3>
-
-  {/* Current Bid */}
-  <p className="text-slate-400 mt-4">
-    Current Bid
-  </p>
-
-  <h3 className="text-green-400 text-lg font-semibold">
-    PKR {auction.currentBid}
-  </h3>
-
-  {/* Status + Approval + Duration */}
-  <div className="flex justify-between items-center mt-5">
-
-    <div>
-    {/* Auction Status */}
-    <span
-      className={`px-3 py-1 rounded-full text-sm ${
-        auction.auctionStatus === "live"
-          ? "bg-green-500/20 text-green-400"
-          : auction.auctionStatus === "upcoming"
-          ? "bg-yellow-500/20 text-yellow-400"
-          : "bg-red-500/20 text-red-400"
-      }`}
-    >
-      {auction.auctionStatus}
-    </span>
-
-    {/* Approval Status */}
-    <span
-      className={`px-3 py-1 rounded-full text-sm ${
-        auction.approvalStatus === "approved"
-          ? "bg-green-500/20 text-green-400"
-          : auction.approvalStatus === "rejected"
-          ? "bg-red-500/20 text-red-400"
-          : "bg-orange-500/20 text-orange-400"
-      }`}
-    >
-      {auction.approvalStatus}
-    </span>
+        <p className="text-amber-400 text-xs">
+          {auction.startDateTime
+            ? new Date(auction.startDateTime).toLocaleTimeString("en-PK", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : ""}
+        </p>
+      </div>
 
     </div>
 
-    {/* Duration */}
-    <div>
-    <span className="text-slate-400 text-sm">
-      {auction.duration}h
-    </span>
+    {/* Starting Price */}
+    <p className="text-slate-400 mt-3">
+      Starting Price
+    </p>
+
+    <h3 className="text-amber-400 text-xl font-bold">
+      PKR {auction.startingPrice}
+    </h3>
+
+    {/* Current Bid */}
+    <p className="text-slate-400 mt-3">
+      Current Bid
+    </p>
+
+    <h3 className="text-green-400 text-lg font-semibold">
+      PKR {auction.currentBid || auction.startingPrice}
+    </h3>
+
+    {/* Status */}
+    <div className="mt-4 flex justify-between items-center">
+
+      <div className="flex gap-2">
+
+        <span
+          className={`px-3 py-1 rounded-full text-sm ${
+            auction.auctionStatus === "live"
+              ? "bg-green-500/20 text-green-400"
+              : auction.auctionStatus === "upcoming"
+              ? "bg-yellow-500/20 text-yellow-400"
+              : "bg-red-500/20 text-red-400"
+          }`}
+        >
+          {auction.auctionStatus}
+        </span>
+
+        <span
+          className={`px-3 py-1 rounded-full text-sm ${
+            auction.approvalStatus === "approved"
+              ? "bg-green-500/20 text-green-400"
+              : auction.approvalStatus === "rejected"
+              ? "bg-red-500/20 text-red-400"
+              : "bg-orange-500/20 text-orange-400"
+          }`}
+        >
+          {auction.approvalStatus}
+        </span>
+
+      </div>
+
+      {/* Duration */}
+      <span className="text-slate-400 text-sm">
+        {auction.duration}h
+      </span>
+
     </div>
 
   </div>
 
 </div>
-
-          </div>
 
         ))}
 

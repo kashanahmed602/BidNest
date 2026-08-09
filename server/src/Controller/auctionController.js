@@ -128,4 +128,32 @@ const marketAuctions = async (req, res) => {
     }
 }
 
-module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions }; 
+const auctionDelete = async (req, res) => {
+    const {id} = req.params;
+
+    try{
+
+        const auction = await Auction.findByIdAndDelete(id);
+
+        if(!auction){
+            return res.status(404).json({
+                success: false,
+                message: "Auction Not Found"
+            })
+        }
+
+         res.status(201).json({
+                success: true,
+                message: "Auction Deleted Successfully"
+            })
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
+
+module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete }; 
