@@ -21,6 +21,12 @@ const auctionSchema = new mongoose.Schema({
         required: true
     },
 
+    gallery: [
+        {
+            type: String
+        }
+    ],
+
     sellerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

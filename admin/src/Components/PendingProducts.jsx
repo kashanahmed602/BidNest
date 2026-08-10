@@ -21,11 +21,17 @@ const PendingProducts = () => {
   useEffect(() => {
     const FetchPendingProducts = async () => {
       try{
-        const response = await axios.get("http://localhost:3000/api/v1/products?status=pending");
+        const response = await axios.get("http://localhost:3000/api/v1/pendingProducts",{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          }
+        });
 
         setPendingProducts(response.data.products);
+        console.log("Pending :", pendingProducts)
       }catch(error){
         alert("Error Fetching Pending Products");
+        console.log(error.message)
       }
     }
 

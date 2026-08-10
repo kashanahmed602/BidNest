@@ -11,6 +11,7 @@ const AuctionModal = ({ closeModal }) => {
   const [minBidAmount, setMinBidAmount] = useState("");
   const [duration, setDuration] = useState("");
   const [image, setImage] = useState(null);
+  const [gallery, setGallery] = useState([]);
 
   const createAuction = async () => {
     try{
@@ -23,6 +24,10 @@ formData.append("startingPrice", startingPrice);
 formData.append("minBidAmount", minBidAmount);
 formData.append("duration", duration);
 formData.append("image", image);  
+
+gallery.forEach((file) => {
+  formData.append("gallery", file)
+})
     
       const token = localStorage.getItem("token");
 
@@ -45,6 +50,7 @@ formData.append("image", image);
     setMinBidAmount("");
     setDuration("");
     setImage(null);
+    setGallery(null);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -182,6 +188,15 @@ formData.append("image", image);
             onChange={(e) => setImage(e.target.files[0])}
             className="bg-slate-800 p-3 rounded-lg text-white"
           />
+
+           <input
+
+        type="file"
+        accept='image/*'
+        multiple
+        onChange={(e) => setGallery(Array.from(e.target.files))}
+        className="bg-slate-800 p-3 rounded-lg text-white"
+        />
 
           {/* Buttons */}
 

@@ -7,16 +7,31 @@ const createAuction = async (req, res) => {
 
     try{
 
+        const mainImage = req.files.image[0];
+
         const uploadImage = await imagekit.upload({
-            file: req.file.buffer,
-            fileName: req.file.originalname,
+            file: mainImage.buffer,
+            fileName: mainImage.originalname,
             folder: "/BidNest"
         })
+
+        const galleryImages = [];
+
+        for(const file of req.files.gallery || []){
+            const uploadGalleryImage = await imagekit.upload({
+                file: file.buffer,
+                fileName: file.originalname,
+                folder: "/Bidnest/gallery/auction"
+            })
+            galleryImages.push(uploadGalleryImage.url);
+        }
+
         const newAuction = await Auction.create({
             name,
             description,
             category,
             image: uploadImage.url,
+            gallery: galleryImages,
             sellerId: req.user.id,
             startingPrice,
             minBidAmount,
@@ -156,4 +171,52 @@ const auctionDelete = async (req, res) => {
     }
 };
 
-module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete }; 
+const getAuctionById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const auction = await Auction.findById(id)
+      .populate("sellerId", "name email");
+
+    if (!auction) {
+      return res.status(404).json({
+        success: false,
+        message: "Auction Not Found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      auction
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+const getPendingAuction = async (req, res) => {
+  try {
+    const auctions = await Auction.find({
+      approvalStatus: "pending"
+    }).populate("sellerId", "name email");
+
+    res.status(200).json({
+      success: true,
+      auctions
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete, getAuctionById, getPendingAuction }; 

@@ -1,8 +1,12 @@
 import SidebarLayout from "../Layout/SidebarLayout";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Marketplace = () => {
+
+  const navigate = useNavigate();
+
   const [marketPlaceProducts, setMarketPlaceProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
@@ -126,6 +130,7 @@ const Marketplace = () => {
 
               <div
                 key={product._id}
+                onClick={() => navigate(`/product/${product._id}`)}
                 className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 hover:border-amber-500 transition"
               >
 
@@ -161,7 +166,7 @@ const Marketplace = () => {
                   <button
                     className="w-full mt-5 bg-amber-500 hover:bg-amber-600 py-3 rounded-lg text-white font-semibold"
                   >
-                    View Product
+                    Buy Now
                   </button>
 
                 </div>

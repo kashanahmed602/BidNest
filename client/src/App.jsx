@@ -14,6 +14,8 @@ import PendingRequest from "./Components/PendingRequest";
 import AccountRejected from "./Components/RejectedRequest";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import MyProducts from "./Pages/MyProducts";
+import ProductDetails from "./Pages/DetailProduct";
+import AuctionDetails from "./Pages/DetailAuction";
 
 function App() {
   return (
@@ -48,7 +50,9 @@ function App() {
 
       <Route path="/my-products" element={<ProtectedRoute><MyProducts/></ProtectedRoute>}/>
 
+      <Route path="/product/:id" element={<ProtectedRoute><ProductDetails/></ProtectedRoute>}/>
 
+      <Route path="/auction/:id" element={<ProtectedRoute><AuctionDetails/></ProtectedRoute>} />
 
     </Routes>
 

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const {createProduct, getProducts, deleteProduct, updateStatusProducts, getMarketPlaceProducts } = require("../Controller/productController");
+const {createProduct, getProducts, deleteProduct, updateStatusProducts, getMarketPlaceProducts, getProductById, getPendingProducts } = require("../Controller/productController");
 const upload = require("../Middleware/upload");
 const auth = require("../Middleware/auth");
 
@@ -10,6 +10,9 @@ router.get("/products",auth, getProducts);
 router.delete("/productDeleted/:id", deleteProduct);
 router.put("/updateStatusProducts/:id", updateStatusProducts);
 router.get("/marketplaceProducts", auth, getMarketPlaceProducts);
+router.get("/product/:id",auth, getProductById);
+router.get("/pendingProducts", auth, getPendingProducts);
+
 // router.get("/products", getPendingProducts);
 
 module.exports = router;

@@ -3,8 +3,11 @@ import SidebarLayout from "../Layout/SidebarLayout";
 import SellProductModal from "./SellProducts";
 import axios from 'axios'
 import { Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const MyProducts = () => {
+
+  const navigate = useNavigate();
 
     const [showModal, setShowModal] = useState(false);
     const [products, setProducts] = useState([]);
@@ -64,7 +67,7 @@ const MyProducts = () => {
 
   {products.map((product) => (
 
-    <div
+    <div onClick={() => navigate(`/product/${product._id}`)}
       key={product._id}
       className="relative bg-slate-900 border border-slate-700 rounded-xl overflow-hidden"
     >

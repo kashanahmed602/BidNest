@@ -3,9 +3,11 @@ import SidebarLayout from "../Layout/SidebarLayout";
 import AuctionModal from "../Components/auctiomModal";
 import axios from "axios";
 import { Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom"
 
 
 const MyBids = () => {
+  const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [auctions, setAuctions] = useState([]);
 
@@ -93,7 +95,7 @@ const MyBids = () => {
 
         {auctions.map((auction) => (
 
-          <div
+          <div onClick={() => navigate(`/auction/${auction._id}`)}
   key={auction._id}
   className="relative bg-slate-900 border border-slate-700 rounded-xl overflow-hidden"
 >

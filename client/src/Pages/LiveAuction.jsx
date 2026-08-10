@@ -1,8 +1,10 @@
 import SidebarLayout from "../Layout/SidebarLayout";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LiveAuctions = () => {
+  const navigate = useNavigate();
   const [liveAuctions, setLiveAuctions] = useState([]);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const LiveAuctions = () => {
 
         {liveAuctions.map((auction) => (
 
-          <div
+          <div onClick={() => navigate(`/auction/${auction._id}`)}
             key={auction._id}
             className="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden hover:border-amber-500 transition"
           >

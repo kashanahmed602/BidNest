@@ -13,9 +13,14 @@ const PendingAuctions = () => {
     const fetchPendingAuctions = async () => {
         try{
 
-            const response = await axios.get("http://localhost:3000/api/v1/auctions?approvalStatus=pending");
+            const response = await axios.get("http://localhost:3000/api/v1/pendingAuctions",{
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                }
+            });
 
             setPendingAuctions(response.data.auctions);
+            // console.log("Pending Auctions :", pendingAuctions);
 
         }catch(error){
             console.log(error.message);

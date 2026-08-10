@@ -68,8 +68,6 @@ const getProducts = async (req, res) => {
             filter.status = req.query.status;
         }
 
-
-
         const products = await Product.find(filter).populate("userId", "name email");
 
         res.status(200).json({
@@ -175,5 +173,56 @@ const getMarketPlaceProducts = async (req, res) => {
     }
 };
 
+const getProductById = async (req, res) => {
 
-module.exports = { createProduct, getProducts, deleteProduct, updateStatusProducts, getMarketPlaceProducts };
+    const { id } = req.params;
+
+    try {
+
+        const product = await Product.findById(id)
+            .populate("userId", "name email");
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product Not Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            product
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+};
+
+const getPendingProducts = async (req, res) => {
+  try {
+    const products = await Product.find({
+      status: "pending"
+    }).populate("userId", "name email");
+
+    res.status(200).json({
+      success: true,
+      products
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+module.exports = { createProduct, getProducts, deleteProduct, updateStatusProducts, getMarketPlaceProducts, getProductById, getPendingProducts };
