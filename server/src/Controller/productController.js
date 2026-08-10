@@ -225,4 +225,120 @@ const getPendingProducts = async (req, res) => {
   }
 };
 
-module.exports = { createProduct, getProducts, deleteProduct, updateStatusProducts, getMarketPlaceProducts, getProductById, getPendingProducts };
+const EditProduct = async (req, res) => {
+
+    const { id } = req.params;
+
+    const {
+        name,
+        description,
+        price,
+        category,
+        quantity,
+        status
+    } = req.body;
+
+    try {
+
+        const updateData = {
+            name,
+            description,
+            price,
+            category,
+            quantity,
+            status
+        };
+
+
+        // =========================
+        // MAIN IMAGE
+        // =========================
+
+        if (req.files?.image?.length > 0) {
+
+            const mainImage = req.files.image[0];
+
+            const uploadImage = await imagekit.upload({
+                file: mainImage.buffer,
+                fileName: mainImage.originalname,
+                folder: "/Bidnet/Update/Products"
+            });
+
+            updateData.image = uploadImage.url;
+        }
+
+
+        // =========================
+        // GALLERY IMAGES
+        // =========================
+
+        if (req.files?.gallery?.length > 0) {
+
+            const galleryImages = [];
+
+            for (const file of req.files.gallery) {
+
+                const uploadGallery = await imagekit.upload({
+                    file: file.buffer,
+                    fileName: file.originalname,
+                    folder: "/Bidnest/Update/Gallery"
+                });
+
+                galleryImages.push(uploadGallery.url);
+            }
+
+            updateData.gallery = galleryImages;
+        }
+
+
+        // =========================
+        // UPDATE PRODUCT
+        // =========================
+
+        const productUpdate = await Product.findByIdAndUpdate(
+            id,
+            updateData,
+            {
+                new: true
+            }
+        );
+
+
+        if (!productUpdate) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+
+        }
+
+
+        res.status(200).json({
+
+            success: true,
+
+            message: "Product Updated Successfully",
+
+            product: productUpdate
+
+        });
+
+
+    } catch (error) {
+
+        console.log("Edit Product Error:", error);
+
+        res.status(500).json({
+
+            success: false,
+
+            message: error.message
+
+        });
+
+    }
+
+};
+
+module.exports = { createProduct, getProducts, deleteProduct, updateStatusProducts, getMarketPlaceProducts, getProductById, getPendingProducts, EditProduct };

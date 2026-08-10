@@ -219,4 +219,69 @@ const getPendingAuction = async (req, res) => {
   }
 };
 
-module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete, getAuctionById, getPendingAuction }; 
+const editAuction = async (req, res) => {
+    const { id } = req.params;
+    const { name, description, category, startingPrice, minBidAmount, duration } = req.body
+
+    try {
+        const updatedData = {
+            name,
+            description,
+            category,
+            startingPrice,
+            minBidAmount,
+            duration
+        }
+
+        if(req.files?.image?.length > 0) {
+        const mainImage = req.files.image[0];
+        const uploadImage = await imagekit.upload({
+            file: mainImage.buffer,
+            fileName: mainImage.originalname,
+            folder: "/Bidnest/Aution/Products"
+        });
+        updatedData.image = uploadImage.url;
+    }
+
+    if(req.files?.gallery?.length > 0){
+        const galleryImage = [];
+        for(const file of req.files.gallery){
+            const uploadGallery = await imagekit.upload({
+                file: file.buffer,
+                fileName: file.originalname,
+                folder: "/Bidnest/Aution/Gallery"
+            });
+            galleryImage.push(uploadGallery.url)
+        }
+
+        updatedData.gallery = galleryImage;
+    }
+
+    const productUpdate = await Auction.findByIdAndUpdate(id,
+        updatedData,
+        {new: true}
+    );
+
+    if(!productUpdate){
+        return res.status(404).json({
+            success: false,
+            message: "Auction Not Found"
+        });
+    }
+
+    res.status(201).json({
+        success: true,
+        message: "Auction Updated Successfully",
+        auction: productUpdate
+    });
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+}
+
+module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete, getAuctionById, getPendingAuction, editAuction }; 

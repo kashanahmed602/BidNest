@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import SidebarLayout from "../Layout/SidebarLayout";
 import SellProductModal from "./SellProducts";
 import axios from 'axios'
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import EditProductModal from "../Components/EditModal";
 
 const MyProducts = () => {
 
@@ -11,6 +12,8 @@ const MyProducts = () => {
 
     const [showModal, setShowModal] = useState(false);
     const [products, setProducts] = useState([]);
+    const [editModal, setEditModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -72,13 +75,35 @@ const MyProducts = () => {
       className="relative bg-slate-900 border border-slate-700 rounded-xl overflow-hidden"
     >
 
-       {/* Delete Button */}
+  {/* Edit + Delete Buttons */}
+
+<div className="absolute top-3 right-3 z-10 flex gap-2">
+
+  {/* Edit Button */}
   <button
-    onClick={() => deleteProduct(product._id)}
-    className="absolute top-3 right-3 z-10 bg-red-600 hover:bg-red-700 p-2 rounded-full shadow-lg transition"
+    onClick={(e) => {
+      e.stopPropagation();
+      setEditModal(true);
+      setSelectedProduct(product);
+    }}
+    className="bg-blue-600 hover:bg-blue-700 p-2 rounded-full shadow-lg transition"
+  >
+    <Pencil size={18} className="text-white" />
+  </button>
+
+
+  {/* Delete Button */}
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      deleteProduct(product._id);
+    }}
+    className="bg-red-600 hover:bg-red-700 p-2 rounded-full shadow-lg transition"
   >
     <Trash2 size={18} className="text-white" />
   </button>
+
+</div>
 
       <img
         src={product.image}
@@ -124,6 +149,12 @@ const MyProducts = () => {
             {showModal && (
                 <SellProductModal closeModal={() => setShowModal(false)} />
             )}
+
+            {editModal && (
+              <EditProductModal product={selectedProduct} closeModal={() => setEditModal(false)}/>
+            )
+
+            }
 
         </SidebarLayout>
 
