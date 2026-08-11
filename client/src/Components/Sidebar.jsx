@@ -79,10 +79,10 @@ const Sidebar = () => {
           Wishlist
         </NavLink>
 
-        <NavLink to="/profile" className="sidebar-link">
+        {/* <NavLink to="/profile" className="sidebar-link">
           <User size={20} />
           Profile
-        </NavLink>
+        </NavLink> */}
 
         <NavLink to="/settings" className="sidebar-link">
           <Settings size={20} />
