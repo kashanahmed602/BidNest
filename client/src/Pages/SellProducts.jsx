@@ -31,7 +31,7 @@ const SellProductModal = ({ closeModal }) => {
       const token = localStorage.getItem("token");
 
 await axios.post(
-  "http://localhost:3000/api/v1/createProduct",
+  `${import.meta.env.VITE_API_URL}/createProduct`,
   formData,
   {
     headers: {

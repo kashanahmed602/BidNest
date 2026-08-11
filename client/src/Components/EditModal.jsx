@@ -41,7 +41,7 @@ const EditProductModal = ({ product, closeModal }) => {
       const token = localStorage.getItem("token");
 
       const response = await axios.put(
-        `http://localhost:3000/api/v1/productUpdate/${product._id}`,
+        `${import.meta.env.VITE_API_URL}/productUpdate/${product._id}`,
         formData,
         {
           headers: {

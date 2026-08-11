@@ -60,7 +60,7 @@ galleryImages.forEach((file) => {
 });
 
 const response = await axios.put(
-  `http://localhost:3000/api/v1/auctionUpdated/${auction._id}`,
+  `${import.meta.env.VITE_API_URL}/auctionUpdated/${auction._id}`,
   formData,
   {
     headers: {

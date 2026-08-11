@@ -19,7 +19,7 @@ const MyProducts = () => {
         const fetchProducts = async () => {
             try{
 
-                const response = await axios.get('http://localhost:3000/api/v1/products',{
+                const response = await axios.get(`${import.meta.env.VITE_API_URL}/products`,{
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                   }
@@ -37,7 +37,7 @@ const MyProducts = () => {
 
     const deleteProduct = async (id) => {
         try{
-            const response = await axios.delete(`http://localhost:3000/api/v1/productDeleted/${id}`);
+            const response = await axios.delete(`${import.meta.env.VITE_API_URL}/productDeleted/${id}`);
 
             alert("Product Deleted Successfully");
             window.location.reload();

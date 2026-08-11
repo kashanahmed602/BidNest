@@ -31,7 +31,7 @@ gallery.forEach((file) => {
     
       const token = localStorage.getItem("token");
 
-        const response = await axios.post("http://localhost:3000/api/v1/createAuction",
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/createAuction`,
             formData,
             {
                 headers: {

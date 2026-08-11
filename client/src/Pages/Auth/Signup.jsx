@@ -24,7 +24,7 @@ useEffect(() => {
     const fetchCountries = async () => {
 
         const response = await axios.get(
-            'http://localhost:3000/api/v1/countries'
+            `${import.meta.env.VITE_API_URL}/countries`
         );
 
         setCountries(response.data.countries);
@@ -48,7 +48,7 @@ const createAccount = async (e) => {
     }
 
     try{
-        const response = await axios.post('http://localhost:3000/api/v1/registerUser', {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/registerUser`, {
             name,
             email,
             phone,

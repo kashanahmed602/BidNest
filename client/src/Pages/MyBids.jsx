@@ -17,7 +17,8 @@ const MyBids = () => {
   const fetchAuctions = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/v1/auctions",{
+        `${import.meta.env.VITE_API_URL}/auctions`,
+        {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
           }
@@ -36,7 +37,7 @@ const MyBids = () => {
 
   const delteAuction = async (id) => {
     try{
-      const response = await axios.delete(`http://localhost:3000/api/v1/deletAuction/${id}`,{
+      const response = await axios.delete(`${import.meta.env.VITE_API_URL}/deletAuction/${id}`,{
         headers: {
            Authorization: `Bearer ${localStorage.getItem("token")}`,
           }

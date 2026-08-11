@@ -15,7 +15,7 @@ const Marketplace = () => {
     const FetchProducts = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/v1/marketplaceProducts",
+          `${import.meta.env.VITE_API_URL}/marketplaceProducts`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

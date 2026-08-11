@@ -11,7 +11,7 @@ const LiveAuctions = () => {
     const fetchAuctions = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/v1/marketAuctions",
+          `${import.meta.env.VITE_API_URL}/marketAuctions`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

@@ -14,7 +14,7 @@ const AuctionDetails = () => {
     const fetchAuction = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/v1/auction/${id}`,
+          `${import.meta.env.VITE_API_URL}/auction/${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
