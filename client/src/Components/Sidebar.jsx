@@ -86,7 +86,7 @@ const Sidebar = () => {
 
         <NavLink to="/settings" className="sidebar-link">
           <Settings size={20} />
-          Settings
+          Setting
         </NavLink>
 
       </div>
