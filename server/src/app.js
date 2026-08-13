@@ -10,6 +10,7 @@ app.use("/api/v1", require("./Routes/userRoutes"));
 app.use("/api/v1", require("./Routes/countryRoutes"));
 app.use("/api/v1", require("./Routes/productRoutes"));
 app.use("/api/v1", require("./Routes/auctionRoutes"));
+app.use("/api/v1", require("./Routes/paymentRoutes"));
 
 
 module.exports = app;
