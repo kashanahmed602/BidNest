@@ -55,7 +55,7 @@ function App() {
       <Route path="/product/:id" element={<ProtectedRoute><ProductDetails/></ProtectedRoute>}/>
 
       <Route path="/auction/:id" element={<ProtectedRoute><AuctionDetails/></ProtectedRoute>} />
-      <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess/></ProtectedRoute>} />
+      <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess/></ProtectedRoute>} />
 
     </Routes>
 
