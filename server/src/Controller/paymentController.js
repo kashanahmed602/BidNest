@@ -2,6 +2,9 @@ const safepay = require("../Config/safePay");
 const Product = require("../Models/productsModel");
 const Order = require("../Models/paymentModel");
 
+const CLIENT_URL =
+  process.env.CLIENT_URL || "http://localhost:5175";
+
 // ==========================================
 // CREATE PAYMENT
 // ==========================================
@@ -242,6 +245,12 @@ const createPayment = async (req, res) => {
     //
     // safepay.checkout.createCheckoutUrl()
 
+    const successRedirectUrl =
+      `${CLIENT_URL}/marketplace?payment=success&orderId=${order._id.toString()}`;
+
+    const cancelRedirectUrl =
+      `${CLIENT_URL}/marketplace?payment=cancelled&orderId=${order._id.toString()}`;
+
     const checkoutURL =
       safepay.checkout.createCheckoutUrl({
 
@@ -257,10 +266,10 @@ const createPayment = async (req, res) => {
           order._id.toString(),
 
         redirect_url:
-          "https://kas-bidnest.vercel.app/payment/success",
+          successRedirectUrl,
 
         cancel_url:
-          "https://kas-bidnest.vercel.app/payment/cancel"
+          cancelRedirectUrl
 
       });
 
@@ -338,15 +347,60 @@ const safepayWebhook = async (req, res) => {
 
   try {
 
+    const body = req.body || {};
+    const payload = body.data || body;
+    const tracker =
+      payload?.tracker ||
+      body?.tracker ||
+      payload?.payment?.tracker ||
+      null;
+
+    const paymentStatus =
+      payload?.status ||
+      body?.status ||
+      payload?.payment?.status ||
+      payload?.transaction_status ||
+      body?.transaction_status ||
+      "";
+
+    const normalizedStatus = String(paymentStatus).toLowerCase();
+    const isSuccessfulPayment =
+      ["paid", "succeeded", "success", "completed", "approved"].includes(
+        normalizedStatus
+      ) ||
+      normalizedStatus.includes("paid") ||
+      normalizedStatus.includes("success") ||
+      normalizedStatus.includes("complete");
+
     console.log(
       "========== SAFE​PAY WEBHOOK =========="
     );
-
-    console.log(req.body);
-
+    console.log(JSON.stringify({
+      tracker,
+      paymentStatus,
+      body
+    }, null, 2));
     console.log(
       "======================================"
     );
+
+    if (!tracker) {
+      return res.status(200).json({
+        success: true,
+        message: "Webhook received without tracker"
+      });
+    }
+
+    if (isSuccessfulPayment) {
+      await Order.findOneAndUpdate(
+        { paymentTracker: tracker },
+        {
+          paymentStatus: "paid",
+          productStatus: "processing"
+        },
+        { new: true }
+      );
+    }
 
     return res.status(200).json({
 
