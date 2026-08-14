@@ -2,6 +2,7 @@ import SidebarLayout from "../Layout/SidebarLayout";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PaymentModal from "../Components/PaymentModal";
 
 const Marketplace = () => {
 
@@ -10,6 +11,7 @@ const Marketplace = () => {
   const [marketPlaceProducts, setMarketPlaceProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     const FetchProducts = async () => {
@@ -163,7 +165,10 @@ const Marketplace = () => {
                     PKR {product.price?.toLocaleString()}
                   </h3>
 
-                  <button
+                  <button onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedProduct(product);
+                  }}
                     className="w-full mt-5 bg-amber-500 hover:bg-amber-600 py-3 rounded-lg text-white font-semibold"
                   >
                     Buy Now
@@ -180,6 +185,13 @@ const Marketplace = () => {
         )}
 
       </div>
+
+      {selectedProduct && (
+  <PaymentModal
+    product={selectedProduct}
+    onClose={() => setSelectedProduct(null)}
+  />
+)}
 
     </SidebarLayout>
   );

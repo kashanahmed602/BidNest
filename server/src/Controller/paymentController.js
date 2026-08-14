@@ -11,7 +11,6 @@ const createPayment = async (req, res) => {
 
     const { productId, paymentMethod } = req.body;
 
-
     // ----------------------------------------
     // 1. Validate request
     // ----------------------------------------
@@ -22,7 +21,6 @@ const createPayment = async (req, res) => {
         message: "Product ID and payment method are required"
       });
     }
-
 
     // ----------------------------------------
     // 2. Validate payment method
@@ -38,12 +36,30 @@ const createPayment = async (req, res) => {
       });
     }
 
+    // ----------------------------------------
+    // 3. Safepay credentials
+    // ----------------------------------------
+
+    const merchantApiKey =
+      process.env.SAFEPAY_PUBLIC_KEY?.trim();
+
+    const secretKey =
+      process.env.SAFEPAY_SECRET_KEY?.trim();
+
+    if (!merchantApiKey || !secretKey) {
+      return res.status(500).json({
+        success: false,
+        message:
+          "Safepay credentials are not configured on the server"
+      });
+    }
 
     // ----------------------------------------
-    // 3. Find product
+    // 4. Find product
     // ----------------------------------------
 
-    const product = await Product.findById(productId);
+    const product =
+      await Product.findById(productId);
 
     if (!product) {
       return res.status(404).json({
@@ -52,10 +68,9 @@ const createPayment = async (req, res) => {
       });
     }
 
-
-    // ----------------------------------------
-    // 4. CASH ON DELIVERY
-    // ----------------------------------------
+    // ========================================
+    // CASH ON DELIVERY
+    // ========================================
 
     if (paymentMethod === "cash_on_delivery") {
 
@@ -81,7 +96,6 @@ const createPayment = async (req, res) => {
 
       });
 
-
       return res.status(201).json({
 
         success: true,
@@ -93,16 +107,18 @@ const createPayment = async (req, res) => {
       });
     }
 
+    // ========================================
+    // SAFE​PAY
+    // ========================================
 
     // ----------------------------------------
-    // 5. SAFE​PAY PAYMENT SESSION
+    // 5. Create Safepay payment session
     // ----------------------------------------
 
     const paymentSession =
       await safepay.payments.session.setup({
 
-        merchant_api_key:
-          process.env.SAFEPAY_PUBLIC_KEY,
+        merchant_api_key: merchantApiKey,
 
         intent: "CYBERSOURCE",
 
@@ -112,22 +128,28 @@ const createPayment = async (req, res) => {
 
         currency: "PKR",
 
-        // Safepay uses lowest denomination
-        // PKR 550,000 -> 55,000,000
-        amount: Number(product.price) * 100,
+        amount:
+          Number(product.price) * 100,
 
         include_fees: false
 
       });
 
+    console.log(
+      "Safepay payment session:",
+      JSON.stringify(
+        paymentSession,
+        null,
+        2
+      )
+    );
 
     // ----------------------------------------
-    // 6. Get Safepay tracker
+    // 6. Get tracker
     // ----------------------------------------
 
     const tracker =
-      paymentSession.data.tracker.token;
-
+      paymentSession?.data?.tracker?.token;
 
     if (!tracker) {
 
@@ -135,83 +157,150 @@ const createPayment = async (req, res) => {
 
         success: false,
 
-        message: "Safepay tracker was not generated"
+        message:
+          "Safepay tracker was not generated"
 
       });
     }
 
-
     // ----------------------------------------
-    // 7. Create Order
-    // ----------------------------------------
-
-    const order = await Order.create({
-
-      productId: product._id,
-
-      productName: product.name,
-
-      buyerId: req.user.id,
-
-      sellerId: product.userId,
-
-      amount: product.price,
-
-      paymentMethod: "safepay",
-
-      paymentStatus: "pending",
-
-      productStatus: "pending",
-
-      paymentTracker: tracker
-
-    });
-
-
-    // ----------------------------------------
-    // 8. Create Safepay Checkout URL
+    // 7. Create order
     // ----------------------------------------
 
-   const checkoutQuery =
-  await safepay.checkout.createCheckoutUrl({
-    tracker,
-    environment: "sandbox",
-    source: "hosted",
-    redirect_url: "...",
-    cancel_url: "..."
-  });
+    const order =
+      await Order.create({
 
-// ========================================
-// CREATE CHECKOUT URL
-// ========================================
+        productId: product._id,
 
-const checkoutURL =
-  "https://sandbox.api.getsafepay.com/components" +
-  "?env=sandbox" +
-  "&beacon=" + encodeURIComponent(tracker) +
-  "&source=hosted" +
-  "&order_id=" + encodeURIComponent(order._id.toString()) +
-  "&redirect_url=" + encodeURIComponent(
-    "https://kas-bidnest.vercel.app/payment/success"
-  ) +
-  "&cancel_url=" + encodeURIComponent(
-    "https://kas-bidnest.vercel.app/payment/cancel"
-  );
+        productName: product.name,
 
-console.log("FINAL CHECKOUT URL:");
-console.log(checkoutURL);
+        buyerId: req.user.id,
+
+        sellerId: product.userId,
+
+        amount: product.price,
+
+        paymentMethod: "safepay",
+
+        paymentStatus: "pending",
+
+        productStatus: "pending",
+
+        paymentTracker: tracker
+
+      });
+
     // ----------------------------------------
-    // 9. Send response
+    // 8. Create authentication token
+    // ----------------------------------------
+
+    const authToken =
+      await safepay.client.passport.create();
+
+    console.log(
+      "Safepay auth token response:",
+      JSON.stringify(
+        authToken,
+        null,
+        2
+      )
+    );
+
+    const tbt =
+      typeof authToken?.data === "string"
+        ? authToken.data
+        : authToken?.data?.token ||
+          authToken?.data?.tbt ||
+          authToken?.token ||
+          authToken?.tbt ||
+          null;
+
+    if (!tbt) {
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Safepay authentication token was not generated"
+
+      });
+    }
+
+    // ========================================
+    // 9. CREATE SAFE​PAY CHECKOUT
+    // ========================================
+
+    // IMPORTANT:
+    // Tumhare installed SDK mein
+    //
+    // safepay.checkouts.payment.create()
+    //
+    // available nahi hai.
+    //
+    // Tumhare SDK mein available method:
+    //
+    // safepay.checkout.createCheckoutUrl()
+
+    const checkoutURL =
+      safepay.checkout.createCheckoutUrl({
+
+        env: "sandbox",
+
+        tbt: tbt,
+
+        tracker: tracker,
+
+        source: "hosted",
+
+        order_id:
+          order._id.toString(),
+
+        redirect_url:
+          "https://kas-bidnest.vercel.app/payment/success",
+
+        cancel_url:
+          "https://kas-bidnest.vercel.app/payment/cancel"
+
+      });
+
+    console.log(
+      "FINAL SAFEPAY CHECKOUT URL:",
+      checkoutURL
+    );
+
+    // ----------------------------------------
+    // 10. Validate checkout URL
+    // ----------------------------------------
+
+    if (
+      !checkoutURL ||
+      typeof checkoutURL !== "string"
+    ) {
+
+      return res.status(500).json({
+
+        success: false,
+
+        message:
+          "Safepay checkout URL was not generated"
+
+      });
+    }
+
+    // ----------------------------------------
+    // 11. Send response
     // ----------------------------------------
 
     return res.status(200).json({
 
       success: true,
 
-      message: "Safepay checkout created",
+      message:
+        "Safepay checkout created",
 
       checkoutURL:
-        checkoutURL.url || checkoutURL,
+        checkoutURL,
 
       orderId:
         order._id,
@@ -221,10 +310,9 @@ console.log(checkoutURL);
 
     });
 
-
   } catch (error) {
 
-    console.log(
+    console.error(
       "Safepay Create Payment Error:",
       error
     );
@@ -233,7 +321,8 @@ console.log(checkoutURL);
 
       success: false,
 
-      message: error.message
+      message:
+        error.message
 
     });
 
@@ -259,18 +348,18 @@ const safepayWebhook = async (req, res) => {
       "======================================"
     );
 
-
     return res.status(200).json({
 
       success: true,
 
-      message: "Webhook received"
+      message:
+        "Webhook received"
 
     });
 
   } catch (error) {
 
-    console.log(
+    console.error(
       "Safepay Webhook Error:",
       error
     );
@@ -279,7 +368,8 @@ const safepayWebhook = async (req, res) => {
 
       success: false,
 
-      message: error.message
+      message:
+        error.message
 
     });
 
@@ -292,4 +382,3 @@ module.exports = {
   createPayment,
   safepayWebhook
 };
-
