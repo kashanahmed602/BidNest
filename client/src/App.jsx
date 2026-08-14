@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Login from "./Pages/Auth/Login";
 import Signup from "./Pages/Auth/Signup";
@@ -17,23 +16,7 @@ import ProtectedRoute from "./Components/ProtectedRoute";
 import MyProducts from "./Pages/MyProducts";
 import ProductDetails from "./Pages/DetailProduct";
 import AuctionDetails from "./Pages/DetailAuction";
-
-const SafepayCallback = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const orderId = params.get("order_id") || "";
-    const tracker = params.get("tracker") || "";
-    const status = location.pathname.includes("cancel") ? "cancelled" : "success";
-
-    const redirectUrl = `/marketplace?payment=${status}&order_id=${encodeURIComponent(orderId)}&tracker=${encodeURIComponent(tracker)}`;
-    navigate(redirectUrl, { replace: true });
-  }, [location.pathname, location.search, navigate]);
-
-  return null;
-};
+import PaymentSuccess from "./Components/payentSuccess";
 
 function App() {
   return (
@@ -48,9 +31,6 @@ function App() {
       <Route path="/" element={<Signup/>}/>
       
       <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard/></ProtectedRoute>} />
-
-      <Route path="/payment/success" element={<SafepayCallback />} />
-      <Route path="/payment/cancel" element={<SafepayCallback />} />
 
       <Route path="/marketplace" element={<ProtectedRoute><Home/></ProtectedRoute>}/>
       
@@ -75,6 +55,7 @@ function App() {
       <Route path="/product/:id" element={<ProtectedRoute><ProductDetails/></ProtectedRoute>}/>
 
       <Route path="/auction/:id" element={<ProtectedRoute><AuctionDetails/></ProtectedRoute>} />
+      <Route path="/payment-success" element={<ProtectedRoute><PaymentSuccess/></ProtectedRoute>} />
 
     </Routes>
 
