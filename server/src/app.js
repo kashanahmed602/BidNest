@@ -11,6 +11,7 @@ app.use("/api/v1", require("./Routes/countryRoutes"));
 app.use("/api/v1", require("./Routes/productRoutes"));
 app.use("/api/v1", require("./Routes/auctionRoutes"));
 app.use("/api/v1", require("./Routes/paymentRoutes"));
+app.use("/api/v1", require("./Routes/orderRoutes"));
 
 
 module.exports = app;

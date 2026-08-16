@@ -10,6 +10,7 @@ import {
   User,
   Settings,
   LogOut,
+  ListOrderedIcon,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -72,6 +73,11 @@ const Sidebar = () => {
         <NavLink to="/won-auctions" className="sidebar-link">
           <Trophy size={20} />
           Won Auctions
+        </NavLink>
+
+        <NavLink to="/my-orders" className="sidebar-link">
+          <ListOrderedIcon size={20} />
+           Orders
         </NavLink>
 
         <NavLink to="/wishlist" className="sidebar-link">
