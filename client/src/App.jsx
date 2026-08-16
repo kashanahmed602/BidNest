@@ -56,6 +56,7 @@ function App() {
 
       <Route path="/auction/:id" element={<ProtectedRoute><AuctionDetails/></ProtectedRoute>} />
       <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess/></ProtectedRoute>} />
+      <Route path="/payment/cancel" element={<ProtectedRoute><PaymentSuccess isCancelled /></ProtectedRoute>} />
 
     </Routes>
 

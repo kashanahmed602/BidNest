@@ -1,17 +1,44 @@
 import SidebarLayout from "../Layout/SidebarLayout";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import PaymentModal from "../Components/PaymentModal";
 
 const Marketplace = () => {
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [marketPlaceProducts, setMarketPlaceProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  useEffect(() => {
+    const rawSearch = location.search || "";
+    const params = new URLSearchParams(rawSearch);
+    const paymentState = params.get("payment");
+    const rawOrderId = params.get("order_id") || params.get("orderId") || "";
+    const tracker = params.get("tracker") || "";
+
+    if (paymentState && (paymentState === "success" || paymentState === "cancelled")) {
+      const normalizedOrderId = rawOrderId.includes("?order_id=")
+        ? rawOrderId.split("?order_id=")[1].split("&")[0]
+        : rawOrderId;
+
+      const targetRoute = paymentState === "cancelled" ? "cancel" : "success";
+
+      if (normalizedOrderId && tracker) {
+        navigate(`/payment/${targetRoute}?order_id=${encodeURIComponent(normalizedOrderId)}&tracker=${encodeURIComponent(tracker)}`, { replace: true });
+        return;
+      }
+
+      if (normalizedOrderId) {
+        navigate(`/payment/${targetRoute}?order_id=${encodeURIComponent(normalizedOrderId)}`, { replace: true });
+        return;
+      }
+    }
+  }, [location.search, navigate]);
 
   useEffect(() => {
     const FetchProducts = async () => {

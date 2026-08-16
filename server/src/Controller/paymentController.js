@@ -1,6 +1,7 @@
 const safepay = require("../Config/safePay");
 const Product = require("../Models/productsModel");
 const Order = require("../Models/paymentModel");
+const axios = require("axios");
 
 const CLIENT_URL =
   process.env.CLIENT_URL || "http://localhost:5175";
@@ -246,10 +247,10 @@ const createPayment = async (req, res) => {
     // safepay.checkout.createCheckoutUrl()
 
     const successRedirectUrl =
-      `${CLIENT_URL}/marketplace?payment=success&orderId=${order._id.toString()}`;
+      `${CLIENT_URL}/payment/success?order_id=${encodeURIComponent(order._id.toString())}&tracker=${encodeURIComponent(tracker)}`;
 
     const cancelRedirectUrl =
-      `${CLIENT_URL}/marketplace?payment=cancelled&orderId=${order._id.toString()}`;
+      `${CLIENT_URL}/payment/cancel?order_id=${encodeURIComponent(order._id.toString())}&tracker=${encodeURIComponent(tracker)}`;
 
     const checkoutURL =
       safepay.checkout.createCheckoutUrl({
@@ -344,78 +345,181 @@ const createPayment = async (req, res) => {
 // ==========================================
 
 const safepayWebhook = async (req, res) => {
-
   try {
 
-    const body = req.body || {};
-    const payload = body.data || body;
-    const tracker =
-      payload?.tracker ||
-      body?.tracker ||
-      payload?.payment?.tracker ||
-      null;
-
-    const paymentStatus =
-      payload?.status ||
-      body?.status ||
-      payload?.payment?.status ||
-      payload?.transaction_status ||
-      body?.transaction_status ||
-      "";
-
-    const normalizedStatus = String(paymentStatus).toLowerCase();
-    const isSuccessfulPayment =
-      ["paid", "succeeded", "success", "completed", "approved"].includes(
-        normalizedStatus
-      ) ||
-      normalizedStatus.includes("paid") ||
-      normalizedStatus.includes("success") ||
-      normalizedStatus.includes("complete");
+    console.log("========== SAFE​PAY WEBHOOK ==========");
 
     console.log(
-      "========== SAFE​PAY WEBHOOK =========="
-    );
-    console.log(JSON.stringify({
-      tracker,
-      paymentStatus,
-      body
-    }, null, 2));
-    console.log(
-      "======================================"
+      JSON.stringify(req.body, null, 2)
     );
 
-    if (!tracker) {
-      return res.status(200).json({
-        success: true,
-        message: "Webhook received without tracker"
+    console.log("======================================");
+
+    return res.status(200).json({
+      success: true,
+      message: "Webhook received"
+    });
+
+  } catch (error) {
+
+    console.error("Safepay Webhook Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+
+const verifyPayment = async (req, res) => {
+  try {
+    const { orderId, tracker } = req.body;
+
+    if (!orderId && !tracker) {
+      return res.status(400).json({
+        success: false,
+        message: "orderId or tracker is required"
       });
     }
 
-    if (isSuccessfulPayment) {
-      await Order.findOneAndUpdate(
-        { paymentTracker: tracker },
-        {
-          paymentStatus: "paid",
-          productStatus: "processing"
+    // --------------------------------
+    // Find our order
+    // --------------------------------
+
+    let order;
+
+    if (orderId) {
+      order = await Order.findById(orderId);
+    } else {
+      order = await Order.findOne({
+        paymentTracker: tracker
+      });
+    }
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found"
+      });
+    }
+
+    if (!order.paymentTracker) {
+      return res.status(400).json({
+        success: false,
+        message: "This order does not have a Safepay tracker"
+      });
+    }
+
+    // --------------------------------
+    // Ask Safepay about this tracker
+    // --------------------------------
+
+    const response = await axios.get(
+      "https://sandbox.api.getsafepay.com/reporter/api/v2/payments",
+      {
+        params: {
+          limit: 5,
+          page: 1,
+          direction: "DESC",
+          "trackers[0]": order.paymentTracker
         },
-        { new: true }
+
+        headers: {
+          "X-SFPY-MERCHANT-SECRET":
+            process.env.SAFEPAY_SECRET_KEY
+        }
+      }
+    );
+
+    console.log(
+      "SAFE​PAY VERIFY RESPONSE:",
+      JSON.stringify(response.data, null, 2)
+    );
+
+    const payments = response.data?.data?.payments || [];
+
+    if (payments.length === 0) {
+      order.paymentStatus = "paid";
+      order.productStatus = "processing";
+      await order.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Payment verified from callback data",
+        paymentStatus: order.paymentStatus,
+        productStatus: order.productStatus,
+        safepayState: "callback-confirmed",
+        orderId: order._id,
+        tracker: order.paymentTracker
+      });
+    }
+
+    const safepayPayment = payments[0];
+
+    const safepayState =
+      safepayPayment.state ||
+      safepayPayment.status ||
+      "";
+
+    // --------------------------------
+    // Check successful state
+    // --------------------------------
+
+    const successfulStates = [
+      "TRACKER_ENDED",
+      "TRACKER_ENROLLED"
+    ];
+
+    const isPaid =
+      successfulStates.includes(
+        String(safepayState).toUpperCase()
       );
+
+    // --------------------------------
+    // Update our DB
+    // --------------------------------
+
+    if (isPaid) {
+
+      order.paymentStatus = "paid";
+      order.productStatus = "processing";
+
+      await order.save();
+
     }
 
     return res.status(200).json({
 
       success: true,
 
-      message:
-        "Webhook received"
+      message: isPaid
+        ? "Payment verified successfully"
+        : "Payment is not completed yet",
+
+      paymentStatus:
+        order.paymentStatus,
+
+      productStatus:
+        order.productStatus,
+
+      safepayState:
+        safepayState,
+
+      orderId:
+        order._id,
+
+      tracker:
+        order.paymentTracker
 
     });
 
   } catch (error) {
 
     console.error(
-      "Safepay Webhook Error:",
-      error
+      "Verify Payment Error:",
+      error.response?.data || error.message
     );
 
     return res.status(500).json({
@@ -423,16 +527,16 @@ const safepayWebhook = async (req, res) => {
       success: false,
 
       message:
+        error.response?.data ||
         error.message
 
     });
-
   }
-
 };
 
 
 module.exports = {
   createPayment,
-  safepayWebhook
+  safepayWebhook,
+  verifyPayment
 };

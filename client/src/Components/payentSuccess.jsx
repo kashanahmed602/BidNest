@@ -1,19 +1,43 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import {
+  useSearchParams,
+  useNavigate,
+  useLocation
+} from "react-router-dom";
 import axios from "axios";
 
-const PaymentSuccess = () => {
+const PaymentSuccess = ({ isCancelled = false }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Verifying payment...");
 
   useEffect(() => {
+    const cancelled = isCancelled || location.pathname.includes("/payment/cancel");
+
+    if (cancelled) {
+      setMessage("Payment cancelled.");
+      setLoading(false);
+      return;
+    }
+
+    const parseOrderId = () => {
+      const directOrderId = searchParams.get("order_id") || searchParams.get("orderId") || "";
+      if (!directOrderId) return "";
+
+      const cleaned = directOrderId.includes("?order_id=")
+        ? directOrderId.split("?order_id=")[1].split("&")[0]
+        : directOrderId;
+
+      return cleaned;
+    };
+
     const verifyPayment = async () => {
       try {
-        const orderId = searchParams.get("order_id");
-        const tracker = searchParams.get("tracker");
+        const orderId = parseOrderId();
+        const tracker = searchParams.get("tracker") || "";
 
         if (!orderId || !tracker) {
           setMessage("Invalid payment information.");
@@ -49,7 +73,7 @@ const PaymentSuccess = () => {
     };
 
     verifyPayment();
-  }, [searchParams]);
+  }, [searchParams, isCancelled, location.pathname]);
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -68,7 +92,7 @@ const PaymentSuccess = () => {
           </>
         ) : (
           <>
-            <h1 className="text-3xl text-green-500 font-bold">
+            <h1 className={`text-3xl font-bold ${isCancelled || location.pathname.includes("/payment/cancel") ? "text-yellow-500" : "text-green-500"}`}>
               {message}
             </h1>
 

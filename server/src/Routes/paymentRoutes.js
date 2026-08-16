@@ -4,15 +4,18 @@ const router = express.Router();
 
 const {
   createPayment,
-  safepayWebhook
+  safepayWebhook,
+  verifyPayment
 } = require("../Controller/paymentController");
 
 const auth = require("../Middleware/auth");
 
 
 // Create payment
-router.post("/paymentCreate",auth, createPayment);
+router.post("/paymentCreate", auth, createPayment);
 
+// Verify payment after Safepay redirect
+router.post("/paymentVerify", auth, verifyPayment);
 
 // Safepay webhook
 router.post("/paymentWebhook", safepayWebhook);
