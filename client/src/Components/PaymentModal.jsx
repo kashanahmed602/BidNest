@@ -7,7 +7,10 @@ const PaymentModal = ({
 }) => {
 
   const [loading, setLoading] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
+  const maxQuantity = Number(product.quantity || 0);
+  const totalAmount = Number(product.price || 0) * quantity;
 
   const handlePayment = async (paymentMethod) => {
 
@@ -19,7 +22,8 @@ const PaymentModal = ({
         `${import.meta.env.VITE_API_URL}/paymentCreate`,
         {
           productId: product._id,
-          paymentMethod: paymentMethod
+          paymentMethod: paymentMethod,
+          quantity
         },
         {
           headers: {
@@ -146,12 +150,46 @@ const PaymentModal = ({
                 {product.category}
               </p>
 
+              <p className="mt-2 text-sm text-slate-300">
+                Available: {maxQuantity}
+              </p>
+
               <p className="mt-2 text-lg font-bold text-amber-500">
-                PKR {product.price?.toLocaleString()}
+                PKR {product.price?.toLocaleString()} each
               </p>
 
             </div>
 
+          </div>
+
+          <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900 p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-300">Quantity</span>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  disabled={quantity <= 1 || loading}
+                  onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                  className="h-8 w-8 rounded-md bg-slate-700 text-lg text-white disabled:opacity-40"
+                >
+                  −
+                </button>
+                <span className="min-w-6 text-center text-white font-semibold">{quantity}</span>
+                <button
+                  type="button"
+                  disabled={quantity >= maxQuantity || loading}
+                  onClick={() => setQuantity((prev) => Math.min(maxQuantity, prev + 1))}
+                  className="h-8 w-8 rounded-md bg-slate-700 text-lg text-white disabled:opacity-40"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between text-sm">
+              <span className="text-slate-400">Total</span>
+              <span className="font-bold text-amber-500">PKR {totalAmount.toLocaleString()}</span>
+            </div>
           </div>
 
         </div>

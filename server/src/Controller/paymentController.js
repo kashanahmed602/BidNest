@@ -13,7 +13,7 @@ const CLIENT_URL =
 const createPayment = async (req, res) => {
   try {
 
-    const { productId, paymentMethod } = req.body;
+    const { productId, paymentMethod, quantity = 1 } = req.body;
 
     // ----------------------------------------
     // 1. Validate request
@@ -72,6 +72,24 @@ const createPayment = async (req, res) => {
       });
     }
 
+    const requestedQuantity = Number(quantity) || 1;
+
+    if (requestedQuantity < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be at least 1"
+      });
+    }
+
+    if (requestedQuantity > Number(product.quantity || 0)) {
+      return res.status(400).json({
+        success: false,
+        message: `Only ${product.quantity} item(s) available in stock`
+      });
+    }
+
+    const totalAmount = Number(product.price) * requestedQuantity;
+
     // ========================================
     // CASH ON DELIVERY
     // ========================================
@@ -88,7 +106,9 @@ const createPayment = async (req, res) => {
 
         sellerId: product.userId,
 
-        amount: product.price,
+        amount: totalAmount,
+
+        quantity: requestedQuantity,
 
         paymentMethod: "cash_on_delivery",
 
@@ -133,7 +153,7 @@ const createPayment = async (req, res) => {
         currency: "PKR",
 
         amount:
-          Number(product.price) * 100,
+          totalAmount * 100,
 
         include_fees: false
 
@@ -182,7 +202,9 @@ const createPayment = async (req, res) => {
 
         sellerId: product.userId,
 
-        amount: product.price,
+        amount: totalAmount,
+
+        quantity: requestedQuantity,
 
         paymentMethod: "safepay",
 
@@ -373,6 +395,25 @@ const safepayWebhook = async (req, res) => {
 };
 
 
+const reduceProductStockForPaidOrder = async (order) => {
+  if (!order || order.paymentStatus === "paid") {
+    return;
+  }
+
+  const product = await Product.findById(order.productId);
+
+  if (!product) {
+    return;
+  }
+
+  const orderQuantity = Number(order.quantity || 1);
+
+  if (Number(product.quantity) >= orderQuantity) {
+    product.quantity = Math.max(0, Number(product.quantity) - orderQuantity);
+    await product.save();
+  }
+};
+
 const verifyPayment = async (req, res) => {
   try {
     const { orderId, tracker } = req.body;
@@ -445,6 +486,8 @@ const verifyPayment = async (req, res) => {
       order.productStatus = "processing";
       await order.save();
 
+      await reduceProductStockForPaidOrder(order);
+
       return res.status(200).json({
         success: true,
         message: "Payment verified from callback data",
@@ -481,13 +524,14 @@ const verifyPayment = async (req, res) => {
     // Update our DB
     // --------------------------------
 
-    if (isPaid) {
-
+    if (isPaid && order.paymentStatus !== "paid") {
       order.paymentStatus = "paid";
       order.productStatus = "processing";
-
       await order.save();
+    }
 
+    if (isPaid) {
+      await reduceProductStockForPaidOrder(order);
     }
 
     return res.status(200).json({

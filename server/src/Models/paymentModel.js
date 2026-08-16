@@ -34,6 +34,12 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Quantity purchased
+    quantity: {
+      type: Number,
+      default: 1,
+    },
+
     // Payment method
     paymentMethod: {
       type: String,

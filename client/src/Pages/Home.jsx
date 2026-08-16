@@ -61,18 +61,25 @@ const Marketplace = () => {
     FetchProducts();
   }, []);
 
+    console.log("Marketplace Products:", marketPlaceProducts);
+
+
   // Search + Category Filter
   const filteredProducts = marketPlaceProducts.filter((product) => {
-    const matchesSearch = product.name
-      ?.toLowerCase()
-      .includes(search.toLowerCase());
 
-    const matchesCategory =
-      category === "All Categories" ||
-      product.category === category;
+  // Quantity 0 wale products show nahi honge
+  const hasStock = Number(product.quantity) > 0;
 
-    return matchesSearch && matchesCategory;
-  });
+  const matchesSearch = product.name
+    ?.toLowerCase()
+    .includes(search.toLowerCase());
+
+  const matchesCategory =
+    category === "All Categories" ||
+    product.category === category;
+
+  return hasStock && matchesSearch && matchesCategory;
+});
 
   return (
     <SidebarLayout>
@@ -188,9 +195,14 @@ const Marketplace = () => {
                     {product.description}
                   </p>
 
-                  <h3 className="text-amber-500 text-2xl font-bold mt-4">
-                    PKR {product.price?.toLocaleString()}
-                  </h3>
+                  <div className="mt-4 flex items-center justify-between">
+                    <h3 className="text-amber-500 text-2xl font-bold">
+                      PKR {product.price?.toLocaleString()}
+                    </h3>
+                    <span className="rounded-full bg-slate-700 px-2 py-1 text-xs text-slate-200">
+                      Stock: {product.quantity || 0}
+                    </span>
+                  </div>
 
                   <button onClick={(e) => {
                     e.stopPropagation();
