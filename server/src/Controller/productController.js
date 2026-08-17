@@ -341,4 +341,6 @@ const EditProduct = async (req, res) => {
 
 };
 
+
+
 module.exports = { createProduct, getProducts, deleteProduct, updateStatusProducts, getMarketPlaceProducts, getProductById, getPendingProducts, EditProduct };

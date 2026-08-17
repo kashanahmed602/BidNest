@@ -17,6 +17,7 @@ import MyProducts from "./Pages/MyProducts";
 import ProductDetails from "./Pages/DetailProduct";
 import AuctionDetails from "./Pages/DetailAuction";
 import PaymentSuccess from "./Components/payentSuccess";
+import Orders from "./Pages/Orders";
 import MyOrders from "./Pages/MyOrders";
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
       <Route path="/auction/:id" element={<ProtectedRoute><AuctionDetails/></ProtectedRoute>} />
       <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess/></ProtectedRoute>} />
       <Route path="/payment/cancel" element={<ProtectedRoute><PaymentSuccess isCancelled /></ProtectedRoute>} />
+      <Route path="/client-orders" element={<ProtectedRoute><Orders/></ProtectedRoute>} />
       <Route path="/my-orders" element={<ProtectedRoute><MyOrders/></ProtectedRoute>} />
 
     </Routes>

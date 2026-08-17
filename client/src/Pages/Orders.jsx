@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import SidebarLayout from "../Layout/SidebarLayout";
 
-const MyOrders = () => {
+const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [category, setCategory] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -794,4 +794,4 @@ const MyOrders = () => {
   );
 };
 
-export default MyOrders;
+export default Orders;

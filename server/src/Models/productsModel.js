@@ -49,7 +49,43 @@ const productSchema = new mongoose.Schema({
         type: String,
         enum: ["pending", "approved", "rejected"],
         default: "pending"
+    },
+
+    // Average
+    rating: {
+        type: Number,
+        min: 0,
+        max: 5,
+        default: 0
+    },
+
+    comment: [
+        {
+        user:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        },
+
+        message:{
+            type: String,
+            trim: true
+        },
+
+        rating :{
+            type: Number,
+            required: true,
+            min: 1,
+            max: 5
+        },
+
+        createdAt:{
+            type: Date,
+            default: Date.now
+        }
+
     }
+    ]
 },
 {
     timestamps: true,

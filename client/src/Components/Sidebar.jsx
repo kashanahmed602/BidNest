@@ -75,9 +75,14 @@ const Sidebar = () => {
           Won Auctions
         </NavLink>
 
-        <NavLink to="/my-orders" className="sidebar-link">
+        <NavLink to="/client-orders" className="sidebar-link">
           <ListOrderedIcon size={20} />
            Orders
+        </NavLink>
+
+        <NavLink to="/my-orders" className="sidebar-link">
+          <ListOrderedIcon size={20} />
+           My Orders
         </NavLink>
 
         <NavLink to="/wishlist" className="sidebar-link">
