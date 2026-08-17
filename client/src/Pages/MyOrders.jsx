@@ -65,13 +65,13 @@ const MyOrders = () => {
   };
 
   // ==========================================
-  // PAYMENT STATUS
+  // PAYMENT STATUS STYLE
   // ==========================================
 
   const getPaymentStyle = (status) => {
     switch (status) {
       case "paid":
-        return "bg-green-500/10 text-green-400 border-green-500/20";
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
 
       case "failed":
         return "bg-red-500/10 text-red-400 border-red-500/20";
@@ -86,13 +86,13 @@ const MyOrders = () => {
   };
 
   // ==========================================
-  // PRODUCT STATUS
+  // PRODUCT STATUS STYLE
   // ==========================================
 
   const getProductStyle = (status) => {
     switch (status) {
       case "delivered":
-        return "bg-green-500/10 text-green-400 border-green-500/20";
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
 
       case "shipped":
         return "bg-blue-500/10 text-blue-400 border-blue-500/20";
@@ -143,8 +143,6 @@ const MyOrders = () => {
     );
   };
 
-  
-
   // ==========================================
   // FILTER BUTTON
   // ==========================================
@@ -183,11 +181,13 @@ const MyOrders = () => {
       <SidebarLayout>
         <div className="flex items-center justify-center min-h-[70vh]">
           <div className="text-center">
+
             <div className="w-10 h-10 border-2 border-slate-700 border-t-amber-500 rounded-full animate-spin mx-auto" />
 
             <p className="text-slate-400 mt-4">
               Loading your orders...
             </p>
+
           </div>
         </div>
       </SidebarLayout>
@@ -198,7 +198,7 @@ const MyOrders = () => {
     <SidebarLayout>
 
       {/* ========================================== */}
-      {/* HEADER */}
+      {/* PAGE HEADER */}
       {/* ========================================== */}
 
       <div className="mb-8">
@@ -210,6 +210,7 @@ const MyOrders = () => {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
 
           <div>
+
             <h1 className="text-4xl font-bold text-white">
               My Orders
             </h1>
@@ -217,6 +218,7 @@ const MyOrders = () => {
             <p className="text-slate-400 mt-2">
               View and track all your purchases
             </p>
+
           </div>
 
           <div className="bg-slate-900 border border-slate-700 rounded-xl px-5 py-3">
@@ -314,12 +316,14 @@ const MyOrders = () => {
             >
 
               {/* ========================================== */}
-              {/* ORDER HEADER */}
+              {/* MAIN ORDER CONTENT */}
               {/* ========================================== */}
 
               <div className="p-6">
 
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+                {/* TOP ROW */}
+
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
 
                   {/* PRODUCT */}
 
@@ -327,9 +331,9 @@ const MyOrders = () => {
 
                     <div
                       className="
-                        w-14
-                        h-14
-                        rounded-xl
+                        w-16
+                        h-16
+                        rounded-2xl
                         bg-slate-800
                         border
                         border-slate-700
@@ -337,6 +341,7 @@ const MyOrders = () => {
                         items-center
                         justify-center
                         text-2xl
+                        shrink-0
                       "
                     >
                       📦
@@ -348,8 +353,20 @@ const MyOrders = () => {
                         {order.productName}
                       </h2>
 
-                      <p className="text-slate-500 text-xs mt-1">
+                      <p className="text-slate-500 text-xs mt-1.5">
                         Order ID: {order._id}
+                      </p>
+
+                      <p className="text-slate-500 text-xs mt-1">
+                        {order.createdAt
+                          ? new Date(
+                              order.createdAt
+                            ).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "N/A"}
                       </p>
 
                     </div>
@@ -357,18 +374,60 @@ const MyOrders = () => {
                   </div>
 
 
-                  {/* PRICE */}
+                  {/* ========================================== */}
+                  {/* RIGHT SIDE - FEEDBACK + AMOUNT */}
+                  {/* ========================================== */}
 
-                  <div className="lg:text-right">
+                  <div className="flex items-center justify-end gap-8">
 
-                    <p className="text-amber-500 text-2xl font-bold">
-                      PKR{" "}
-                      {Number(order.amount || 0).toLocaleString()}
-                    </p>
+                    {/* FEEDBACK BUTTON */}
 
-                    <p className="text-slate-500 text-sm mt-1">
-                      Quantity: {order.quantity || 1}
-                    </p>
+                    {order.paymentStatus === "paid" &&
+                      order.productStatus === "delivered" && (
+
+                        <button
+                          onClick={() => setSelectedOrder(order)}
+                          className="
+                            inline-flex
+                            items-center
+                            gap-1.5
+                            px-3
+                            py-2
+                            rounded-lg
+                            bg-amber-500/10
+                            border
+                            border-amber-500/30
+                            text-amber-400
+                            text-xs
+                            font-semibold
+                            hover:bg-amber-500
+                            hover:text-white
+                            hover:border-amber-500
+                            transition-all
+                            whitespace-nowrap
+                          "
+                        >
+                          <span>⭐</span>
+                          Feedback
+                        </button>
+
+                      )}
+
+
+                    {/* AMOUNT */}
+
+                    <div className="text-right">
+
+                      <p className="text-amber-500 text-2xl font-bold">
+                        PKR{" "}
+                        {Number(order.amount || 0).toLocaleString()}
+                      </p>
+
+                      <p className="text-slate-500 text-sm mt-1">
+                        Quantity: {order.quantity || 1}
+                      </p>
+
+                    </div>
 
                   </div>
 
@@ -376,20 +435,27 @@ const MyOrders = () => {
 
 
                 {/* ========================================== */}
+                {/* DIVIDER */}
+                {/* ========================================== */}
+
+                <div className="border-t border-slate-800 my-6" />
+
+
+                {/* ========================================== */}
                 {/* ORDER INFORMATION */}
                 {/* ========================================== */}
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-6 pt-5 border-t border-slate-800">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
 
                   {/* PAYMENT METHOD */}
 
                   <div>
 
-                    <p className="text-slate-500 text-xs uppercase tracking-wide">
+                    <p className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
                       Payment Method
                     </p>
 
-                    <p className="text-slate-200 font-medium text-sm mt-1.5">
+                    <p className="text-slate-200 text-sm font-medium mt-2">
                       {formatText(order.paymentMethod)}
                     </p>
 
@@ -400,11 +466,11 @@ const MyOrders = () => {
 
                   <div>
 
-                    <p className="text-slate-500 text-xs uppercase tracking-wide">
+                    <p className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
                       Seller
                     </p>
 
-                    <p className="text-slate-200 font-medium text-sm mt-1.5">
+                    <p className="text-slate-200 text-sm font-medium mt-2">
                       {order.sellerId?.name || "N/A"}
                     </p>
 
@@ -415,11 +481,11 @@ const MyOrders = () => {
 
                   <div>
 
-                    <p className="text-slate-500 text-xs uppercase tracking-wide">
+                    <p className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
                       Seller Email
                     </p>
 
-                    <p className="text-slate-200 font-medium text-sm mt-1.5 truncate">
+                    <p className="text-slate-200 text-sm font-medium mt-2 truncate">
                       {order.sellerId?.email || "N/A"}
                     </p>
 
@@ -430,11 +496,11 @@ const MyOrders = () => {
 
                   <div>
 
-                    <p className="text-slate-500 text-xs uppercase tracking-wide">
+                    <p className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
                       Order Date
                     </p>
 
-                    <p className="text-slate-200 font-medium text-sm mt-1.5">
+                    <p className="text-slate-200 text-sm font-medium mt-2">
                       {order.createdAt
                         ? new Date(
                             order.createdAt
@@ -454,79 +520,36 @@ const MyOrders = () => {
 
 
               {/* ========================================== */}
-              {/* STATUS SECTION */}
+              {/* STATUS FOOTER */}
               {/* ========================================== */}
 
-              <div className="bg-slate-950/50 border-t border-slate-800 p-6">
+              <div className="bg-slate-950/60 border-t border-slate-800 px-6 py-5">
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                   {/* PAYMENT STATUS */}
 
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                  <div className="bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-3">
 
-                    <div className="flex items-center justify-between mb-3">
-
-                      <p className="text-slate-500 text-xs uppercase tracking-wide">
-                        Payment Status
-                      </p>
-
-                      <span className="text-xs text-slate-600">
-                        PAYMENT
-                      </span>
-
-                    </div>
+                    <p className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold mb-2">
+                      Payment Status
+                    </p>
 
                     <StatusBadge
                       status={order.paymentStatus}
                       type="payment"
                     />
 
-                    {/* FEEDBACK */}
-
-{order.paymentStatus === "paid" &&
- order.productStatus === "delivered" && (
-
-  <div className="mt-5">
-
-    <button
-      onClick={() => setSelectedOrder(order)}
-      className="
-        w-full
-        bg-amber-500
-        hover:bg-amber-600
-        text-white
-        py-3
-        rounded-xl
-        font-semibold
-        transition
-      "
-    >
-      ⭐ Add Feedback
-    </button>
-
-  </div>
-
-)}
-
                   </div>
 
 
-                  {/* PRODUCT STATUS */}
+                  {/* ORDER STATUS */}
 
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                  <div className="bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-3">
 
-                    <div className="flex items-center justify-between mb-3">
-
-                      <p className="text-slate-500 text-xs uppercase tracking-wide">
-                        Order Status
-                      </p>
-
-                      <span className="text-xs text-slate-600">
-                        ORDER
-                      </span>
-
-                    </div>
+                    <p className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold mb-2">
+                      Order Status
+                    </p>
 
                     <StatusBadge
                       status={order.productStatus}
@@ -539,25 +562,25 @@ const MyOrders = () => {
 
 
                 {/* ========================================== */}
-                {/* SAFEPAY TRACKER */}
+                {/* SAFEPAY REFERENCE */}
                 {/* ========================================== */}
 
-                {order.paymentMethod === "safepay" &&
+                {/* {order.paymentMethod === "safepay" &&
                   order.paymentTracker && (
 
-                    <div className="mt-4 bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <div className="mt-4 px-4 py-3 bg-slate-900/70 border border-slate-800 rounded-xl">
 
-                      <p className="text-slate-500 text-xs uppercase tracking-wide">
+                      <p className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
                         Payment Reference
                       </p>
 
-                      <p className="text-slate-400 text-xs mt-2 break-all">
+                      <p className="text-slate-400 text-xs mt-1.5 break-all">
                         {order.paymentTracker}
                       </p>
 
                     </div>
 
-                  )}
+                  )} */}
 
               </div>
 
@@ -569,15 +592,22 @@ const MyOrders = () => {
 
       )}
 
+
+      {/* ========================================== */}
+      {/* FEEDBACK MODAL */}
+      {/* ========================================== */}
+
       {selectedOrder && (
-  <FeedbackModal
-    product={selectedOrder}
-    onClose={() => setSelectedOrder(null)}
-    onSuccess={() => {
-      setSelectedOrder(null);
-    }}
-  />
-)}
+
+        <FeedbackModal
+          product={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          onSuccess={() => {
+            setSelectedOrder(null);
+          }}
+        />
+
+      )}
 
     </SidebarLayout>
   );

@@ -180,7 +180,7 @@ const getProductById = async (req, res) => {
     try {
 
         const product = await Product.findById(id)
-            .populate("userId", "name email");
+            .populate("userId", "name email").populate("comment.userId", "name");
 
         if (!product) {
             return res.status(404).json({

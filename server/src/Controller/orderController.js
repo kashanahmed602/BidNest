@@ -140,7 +140,7 @@ const rateProduct = async (req, res) => {
     // ----------------------------------------
 
     product.comment.push({
-      userId: req.user.id,
+      userId: req.user._id,
       message: message.trim(),
       rating: Number(rating)
     });
