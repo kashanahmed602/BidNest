@@ -284,4 +284,92 @@ const editAuction = async (req, res) => {
     }
 }
 
-module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete, getAuctionById, getPendingAuction, editAuction }; 
+const placeBid = async (req, res) => {
+    try {
+
+        const { auctionId, bidAmount } = req.body;
+
+        const auction = await Auction.findById(auctionId);
+
+        if (!auction) {
+            return res.status(404).json({
+                success: false,
+                message: "Auction Not Found"
+            });
+        }
+
+        // Auction live honi chahiye
+        if (auction.auctionStatus !== "live") {
+            return res.status(400).json({
+                success: false,
+                message: "Auction is not live"
+            });
+        }
+
+        const userBid = Number(bidAmount);
+        const currentBid = Number(auction.currentBid) || 0;
+        const startingPrice = Number(auction.startingPrice);
+        const minBidAmount = Number(auction.minBidAmount);
+
+        // Invalid amount
+        if (!userBid || userBid <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid bid amount"
+            });
+        }
+
+        // User ki bid minimum increment se kam nahi honi chahiye
+        if (userBid < minBidAmount) {
+            return res.status(400).json({
+                success: false,
+                message: `Minimum bid amount is PKR ${minBidAmount.toLocaleString()}`
+            });
+        }
+
+        let newBid;
+
+        // FIRST BID
+        if (currentBid === 0) {
+
+            newBid = startingPrice + userBid;
+
+        }
+
+        // NEXT BID
+        else {
+
+            newBid = currentBid + userBid;
+
+        }
+
+        // Update current bid
+        auction.currentBid = newBid;
+
+        // Save bid history
+        auction.bids.push({
+            bidderId: req.user.id,
+            amount: newBid
+        });
+
+        await auction.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Bid placed successfully",
+            currentBid: auction.currentBid
+        });
+
+    } catch (error) {
+
+        console.error("Place Bid Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
+
+module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete, getAuctionById, getPendingAuction, editAuction, placeBid }; 

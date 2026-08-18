@@ -75,7 +75,28 @@ const auctionSchema = new mongoose.Schema({
     type: String,
     enum: ["upcoming", "live", "ended"],
     default: "upcoming"
-}
+},
+
+bids:[
+    {
+        bidderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+
+        amount: {
+            type: Number,
+            required: true
+        },
+
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+
+    }
+],
 
 },
 
