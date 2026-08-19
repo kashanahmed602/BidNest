@@ -1,6 +1,7 @@
 import SidebarLayout from "../Layout/SidebarLayout";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 
 const LiveAuctions = () => {
@@ -56,7 +57,7 @@ const LiveAuctions = () => {
 
   const placeBid = async (auctionId, bid) => {
     try{
-      const bidAmount = await axios.post(`${import.meta.env.VITE_API_URL}/placeBid`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/placeBid`, {
         auctionId: auctionId,
         bidAmount: bid
       }, {
@@ -65,13 +66,84 @@ const LiveAuctions = () => {
         }
       });
 
-      alert("Bid Placed Successfully")
-      console.log(bidAmount)
+      const newCurrentBid = response.data.currentBid;
+
+      // Optimistically update UI for current user
+      setLiveAuctions(prev => prev.map(a => a._id === auctionId ? {
+        ...a,
+        currentBid: newCurrentBid,
+        lastBidderName: "You",
+        lastBidderId: (() => {
+          try{
+            const token = localStorage.getItem("token") || "";
+            const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+            return payload.id || null;
+          }catch(e){ return null }
+        })()
+      } : a));
+
+      alert("Bid Placed Successfully");
+      console.log(response.data);
     }catch(error){
       alert("Error Placing Bid: " + error.message)
 
     }
   }
+
+  // Get current user id from token (safe decode)
+  const getCurrentUserId = () => {
+    try{
+      const token = localStorage.getItem("token") || "";
+      if(!token) return null;
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(atob(base64).split("").map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const payload = JSON.parse(jsonPayload);
+      return payload.id || null;
+    }catch(e){
+      return null;
+    }
+  }
+
+  // ==========================================
+  // SOCKET: listen for bidPlaced events
+  // ==========================================
+  useEffect(() => {
+    let socket;
+    try{
+      const apiUrl = import.meta.env.VITE_API_URL;
+      let origin;
+      if (apiUrl) {
+        try {
+          origin = new URL(apiUrl).origin;
+        } catch (e) {
+          origin = window.location.origin;
+        }
+      } else {
+        origin = window.location.origin;
+      }
+
+      socket = io(origin, { transports: ["websocket"] });
+
+      socket.on("bidPlaced", (data) => {
+        const { auctionId, currentBid, bidderName, bidderId } = data;
+        setLiveAuctions(prev => prev.map(a => a._id === auctionId ? {
+          ...a,
+          currentBid: currentBid,
+          lastBidderName: bidderName,
+          lastBidderId: bidderId
+        } : a));
+      });
+    }catch(err){
+      console.warn("Socket init failed:", err);
+    }
+
+    return () => {
+      if(socket && socket.disconnect) socket.disconnect();
+    }
+  }, []);
 
 
   // ==========================================
@@ -379,21 +451,21 @@ const LiveAuctions = () => {
 
                     {/* LIVE BADGE */}
 
-                    <div className="
+                    <div className={`
                       absolute
                       top-3
                       left-3
                       flex
                       items-center
                       gap-2
-                      bg-green-500/90
+                      ${auction.auctionStatus === "live" ? "bg-red-500/80" : "bg-green-500/80"}
                       text-white
                       px-3
                       py-1.5
                       rounded-full
                       text-xs
                       font-semibold
-                    ">
+                    `}>
 
                       <span className="
                         w-1.5
@@ -403,7 +475,7 @@ const LiveAuctions = () => {
                         animate-pulse"
                       />
 
-                      LIVE
+                      {auction.auctionStatus.toUpperCase()}
 
                     </div>
 
@@ -491,6 +563,18 @@ const LiveAuctions = () => {
                         PKR{" "}
                         {currentBid.toLocaleString()}
                       </p>
+
+                      {auction.lastBidderName && (
+                        <p className="text-slate-400 text-xs mt-2">
+                          {auction.lastBidderId && auction.lastBidderId === getCurrentUserId() ? (
+                            <>
+                              Bid By You
+                            </>
+                          ) : (
+                            <>{auction.lastBidderName} ne bid kari hai</>
+                          )}
+                        </p>
+                      )}
 
                     </div>
 

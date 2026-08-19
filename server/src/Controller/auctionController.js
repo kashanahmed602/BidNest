@@ -123,17 +123,33 @@ const marketAuctions = async (req, res) => {
             approvalStatus: "approved"
         });
 
-        if(!auctions){
-            return res.status(404).json({
-                success: false,
-                message: "No Auctions Found"
+        if(!auctions || auctions.length === 0){
+            return res.status(200).json({
+                success: true,
+                message: "Auctions Fetched Successfully",
+                auctions: []
             });
         }
+
+        // populate bidder names for last bid
+        const populated = await Auction.find({
+            sellerId: { $ne: req.user.id},
+            approvalStatus: "approved"
+        }).populate("sellerId", "name email").populate("bids.bidderId", "name").lean();
+
+        const auctionsWithLast = populated.map(a => {
+            const lastBid = a.bids && a.bids.length ? a.bids[a.bids.length - 1] : null;
+            return {
+                ...a,
+                lastBidderName: lastBid && lastBid.bidderId ? lastBid.bidderId.name : null,
+                lastBidderId: lastBid && lastBid.bidderId ? String(lastBid.bidderId._id) : (lastBid ? String(lastBid.bidderId) : null)
+            };
+        });
 
         res.status(200).json({
             success: true,
             message: "Auctions Fetched Successfully",
-            auctions: auctions
+            auctions: auctionsWithLast
         });
     }catch(error){
         res.status(500).json({
@@ -353,6 +369,21 @@ const placeBid = async (req, res) => {
         });
 
         await auction.save();
+
+        // Emit real-time update to connected clients
+        try {
+            const io = req.app && req.app.get && req.app.get("io");
+            if (io) {
+                io.emit("bidPlaced", {
+                    auctionId: auction._id,
+                    currentBid: auction.currentBid,
+                    bidderName: req.user && req.user.name ? req.user.name : "Someone",
+                    bidderId: req.user && req.user._id ? String(req.user._id) : null
+                });
+            }
+        } catch (emitError) {
+            console.error("Error emitting bidPlaced:", emitError);
+        }
 
         return res.status(200).json({
             success: true,
