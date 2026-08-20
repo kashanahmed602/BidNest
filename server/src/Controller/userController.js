@@ -213,6 +213,76 @@ const addToWishlist = async(req, res) => {
             message: "Internal Server Error"
         });
     }
-}
+};
 
-module.exports = {registerUser, loginUser, loginAdmin, getUsers, updateStatus, addToWishlist};
+const removeFromWishlist = async (req, res) => {
+    const { productId } = req.body;
+
+    try{
+        const user = await User.find({_id: req.user.id, status: "approved"} );
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "User Not Exists"
+            });
+        }
+
+        const product = await Product.find({_id: productId, status: "approved"});
+
+        if(!product){
+            return res.status(404).json({
+                success: false,
+                message: "Product Not Exists"
+            })
+        }
+
+        const removeWishlist = await User.findByIdAndUpdate(
+            req.user.id,
+            { $pull: { wishlist: { productId } } },
+            { new: true }
+        );
+        res.status(200).json({
+            success: true,
+            message: "Product Removed from Wishlist",
+            wishlist: removeWishlist.wishlist
+        });
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
+
+const getWishlist = async (req, res) => {
+    try{
+        const wishlist = await User.findOne({
+            _id: { $eq: req.user.id },
+            status: "approved"
+        }).populate("wishlist.productId");
+
+        if(!wishlist){
+            return res.status(404).json({
+                success: false,
+                message: "Wishlist Not Found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Wislist Fetched Successfully",
+            wishlist: wishlist.wishlist || []   
+        });
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+};
+
+module.exports = {registerUser, loginUser, loginAdmin, getUsers, updateStatus, addToWishlist, removeFromWishlist, getWishlist};

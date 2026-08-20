@@ -14,47 +14,185 @@ const Marketplace = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // ==========================================
+  // WISHLIST IDS
+  // ==========================================
+
   const [wishlistIds, setWishlistIds] = useState(() => {
+
     try {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      return new Set((user.wishlist || []).map((item) => String(item.productId)));
+
+      const user = JSON.parse(
+        localStorage.getItem("user") || "{}"
+      );
+
+      return new Set(
+        (user.wishlist || []).map(
+          (item) => String(item.productId)
+        )
+      );
+
     } catch {
+
       return new Set();
+
     }
+
   });
+
+  // Currently processing wishlist product
   const [wishlistLoading, setWishlistLoading] = useState(null);
 
-  const addtoWishlist = async (productId) => {
-    if (wishlistIds.has(String(productId)) || wishlistLoading === productId) {
+
+  // ==========================================
+  // TOGGLE WISHLIST
+  // ==========================================
+
+  const toggleWishlist = async (productId) => {
+
+    const id = String(productId);
+
+    // Prevent duplicate request
+    if (wishlistLoading === id) {
       return;
     }
 
-    try{
-      setWishlistLoading(productId);
-      const response = await axios.put(`${import.meta.env.VITE_API_URL}/addInToWishlist`, { productId }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        }
-      });
+    const alreadyInWishlist =
+      wishlistIds.has(id);
 
-      setWishlistIds((currentIds) => {
-        const nextIds = new Set(currentIds);
-        nextIds.add(String(productId));
-        return nextIds;
-      });
+    try {
 
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      localStorage.setItem("user", JSON.stringify({
-        ...user,
-        wishlist: response.data.wishlist || user.wishlist || []
-      }));
-      alert("Product Added To Wishlist");
-    }catch(error){
-      alert("Error Adding to Wishlist");
+      setWishlistLoading(id);
+
+      let response;
+
+      // ==========================================
+      // REMOVE FROM WISHLIST
+      // ==========================================
+
+      if (alreadyInWishlist) {
+
+        response = await axios.put(
+          `${import.meta.env.VITE_API_URL}/removeFromWishlist`,
+          {
+            productId
+          },
+          {
+            headers: {
+              Authorization:
+                `Bearer ${localStorage.getItem("token")}`
+            }
+          }
+        );
+
+
+        // Remove product ID from React state
+        setWishlistIds((currentIds) => {
+
+          const nextIds =
+            new Set(currentIds);
+
+          nextIds.delete(id);
+
+          return nextIds;
+
+        });
+
+
+        // Update localStorage
+        const user =
+          JSON.parse(
+            localStorage.getItem("user") || "{}"
+          );
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...user,
+            wishlist:
+              response.data.wishlist ||
+              (user.wishlist || []).filter(
+                (item) =>
+                  String(item.productId) !== id
+              )
+          })
+        );
+
+      }
+
+      // ==========================================
+      // ADD TO WISHLIST
+      // ==========================================
+
+      else {
+
+        response = await axios.put(
+          `${import.meta.env.VITE_API_URL}/addInToWishlist`,
+          {
+            productId
+          },
+          {
+            headers: {
+              Authorization:
+                `Bearer ${localStorage.getItem("token")}`
+            }
+          }
+        );
+
+
+        // Add product ID to React state
+        setWishlistIds((currentIds) => {
+
+          const nextIds =
+            new Set(currentIds);
+
+          nextIds.add(id);
+
+          return nextIds;
+
+        });
+
+
+        // Update localStorage
+        const user =
+          JSON.parse(
+            localStorage.getItem("user") || "{}"
+          );
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...user,
+            wishlist:
+              response.data.wishlist ||
+              user.wishlist ||
+              []
+          })
+        );
+
+      }
+
+    } catch (error) {
+
+      console.log(
+        "Wishlist Error:",
+        error
+      );
+
+      alert(
+        alreadyInWishlist
+          ? "Error Removing From Wishlist"
+          : "Error Adding To Wishlist"
+      );
+
     } finally {
+
       setWishlistLoading(null);
+
     }
-  }
+
+  };
 
 
   // ==========================================
@@ -63,10 +201,14 @@ const Marketplace = () => {
 
   useEffect(() => {
 
-    const rawSearch = location.search || "";
-    const params = new URLSearchParams(rawSearch);
+    const rawSearch =
+      location.search || "";
 
-    const paymentState = params.get("payment");
+    const params =
+      new URLSearchParams(rawSearch);
+
+    const paymentState =
+      params.get("payment");
 
     const rawOrderId =
       params.get("order_id") ||
@@ -99,18 +241,24 @@ const Marketplace = () => {
           : "success";
 
 
-      if (normalizedOrderId && tracker) {
+      if (
+        normalizedOrderId &&
+        tracker
+      ) {
 
         navigate(
           `/payment/${targetRoute}?order_id=${encodeURIComponent(
             normalizedOrderId
-          )}&tracker=${encodeURIComponent(tracker)}`,
+          )}&tracker=${encodeURIComponent(
+            tracker
+          )}`,
           {
             replace: true
           }
         );
 
         return;
+
       }
 
 
@@ -126,6 +274,7 @@ const Marketplace = () => {
         );
 
         return;
+
       }
 
     }
@@ -143,15 +292,16 @@ const Marketplace = () => {
 
       try {
 
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/marketplaceProducts`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${localStorage.getItem("token")}`,
+        const response =
+          await axios.get(
+            `${import.meta.env.VITE_API_URL}/marketplaceProducts`,
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${localStorage.getItem("token")}`,
+              }
             }
-          }
-        );
+          );
 
 
         setMarketPlaceProducts(
@@ -175,47 +325,42 @@ const Marketplace = () => {
   }, []);
 
 
-  console.log(
-    "Marketplace Products:",
-    marketPlaceProducts
-  );
-
-
   // ==========================================
   // SEARCH + CATEGORY FILTER
   // ==========================================
 
   const filteredProducts =
-    marketPlaceProducts.filter((product) => {
+    marketPlaceProducts.filter(
+      (product) => {
 
-      // Quantity 0 wale products show nahi honge
-
-      const hasStock =
-        Number(product.quantity) > 0;
-
-
-      // Search
-
-      const matchesSearch =
-        product.name
-          ?.toLowerCase()
-          .includes(search.toLowerCase());
+        // Quantity 0 wale products show nahi honge
+        const hasStock =
+          Number(product.quantity) > 0;
 
 
-      // Category
+        // Search
+        const matchesSearch =
+          product.name
+            ?.toLowerCase()
+            .includes(
+              search.toLowerCase()
+            );
 
-      const matchesCategory =
-        category === "All Categories" ||
-        product.category === category;
+
+        // Category
+        const matchesCategory =
+          category === "All Categories" ||
+          product.category === category;
 
 
-      return (
-        hasStock &&
-        matchesSearch &&
-        matchesCategory
-      );
+        return (
+          hasStock &&
+          matchesSearch &&
+          matchesCategory
+        );
 
-    });
+      }
+    );
 
 
   // ==========================================
@@ -226,7 +371,6 @@ const Marketplace = () => {
 
     const numericRating =
       Number(rating || 0);
-
 
     const roundedRating =
       Math.round(numericRating);
@@ -240,34 +384,38 @@ const Marketplace = () => {
 
         <div className="flex items-center">
 
-          {[1, 2, 3, 4, 5].map((star) => (
+          {[1, 2, 3, 4, 5].map(
+            (star) => (
 
-            <span
-              key={star}
-              className={`
-                text-lg
-                leading-none
-                ${
-                  star <= roundedRating
-                    ? "text-yellow-400"
-                    : "text-slate-600"
-                }
-              `}
-            >
-              ★
-            </span>
+              <span
+                key={star}
+                className={`
+                  text-lg
+                  leading-none
+                  ${
+                    star <= roundedRating
+                      ? "text-yellow-400"
+                      : "text-slate-600"
+                  }
+                `}
+              >
+                ★
+              </span>
 
-          ))}
+            )
+          )}
 
         </div>
 
 
-        {/* Number */}
+        {/* Rating Number */}
 
-        <span className="text-slate-400 text-sm font-medium">
-
+        <span className="
+          text-slate-400
+          text-sm
+          font-medium
+        ">
           {numericRating.toFixed(1)}
-
         </span>
 
       </div>
@@ -276,6 +424,10 @@ const Marketplace = () => {
 
   };
 
+
+  // ==========================================
+  // UI
+  // ==========================================
 
   return (
 
@@ -287,11 +439,18 @@ const Marketplace = () => {
 
       <div className="mb-8">
 
-        <h1 className="text-4xl font-bold text-white">
+        <h1 className="
+          text-4xl
+          font-bold
+          text-white
+        ">
           Marketplace
         </h1>
 
-        <p className="text-slate-400 mt-2">
+        <p className="
+          text-slate-400
+          mt-2
+        ">
           Discover products from other sellers
         </p>
 
@@ -480,7 +639,10 @@ const Marketplace = () => {
 
         {filteredProducts.length === 0 ? (
 
-          <div className="text-center py-20">
+          <div className="
+            text-center
+            py-20
+          ">
 
             <div className="
               w-16
@@ -493,16 +655,25 @@ const Marketplace = () => {
               mx-auto
               mb-4
             ">
+
               <span className="text-2xl">
                 📦
               </span>
+
             </div>
 
-            <p className="text-slate-400 text-xl">
+            <p className="
+              text-slate-400
+              text-xl
+            ">
               No Products Found
             </p>
 
-            <p className="text-slate-500 text-sm mt-2">
+            <p className="
+              text-slate-500
+              text-sm
+              mt-2
+            ">
               Try changing your search or category.
             </p>
 
@@ -519,200 +690,267 @@ const Marketplace = () => {
           ">
 
 
-            {filteredProducts.map((product) => (
+            {filteredProducts.map(
+              (product) => {
 
-              <div
-                key={product._id}
-                onClick={() =>
-                  navigate(`/product/${product._id}`)
-                }
-                className="
-                  bg-slate-800
-                  rounded-xl
-                  overflow-hidden
-                  border
-                  border-slate-700
-                  hover:border-amber-500
-                  transition
-                  cursor-pointer
-                "
-              >
+                const isWishlisted =
+                  wishlistIds.has(
+                    String(product._id)
+                  );
+
+                const isWishlistLoading =
+                  wishlistLoading ===
+                  String(product._id);
 
 
-                {/* ========================================== */}
-                {/* PRODUCT IMAGE */}
-                {/* ========================================== */}
+                return (
 
-                <div className="relative">
-
-                  <img
-                    src={product.image}
-                    alt={product.name}
+                  <div
+                    key={product._id}
+                    onClick={() =>
+                      navigate(
+                        `/product/${product._id}`
+                      )
+                    }
                     className="
-                      h-48
-                      w-full
-                      object-cover
-                    "
-                  />
-
-
-                  {/* Category Badge */}
-
-                  <span className="
-                    absolute
-                    top-3
-                    left-3
-                    bg-slate-950/80
-                    backdrop-blur-sm
-                    text-slate-200
-                    px-3
-                    py-1
-                    rounded-full
-                    text-xs
-                    font-medium
-                  ">
-                    {product.category}
-                  </span>
-
-                  <button
-                    type="button"
-                    aria-label={wishlistIds.has(String(product._id)) ? "Added to wishlist" : "Add to wishlist"}
-                    disabled={wishlistLoading === product._id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addtoWishlist(product._id);
-                    }}
-                    className="absolute top-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/80 text-white backdrop-blur-sm transition hover:bg-slate-950 disabled:cursor-wait disabled:opacity-70"
-                  >
-                    <Heart
-                      size={21}
-                      className={wishlistIds.has(String(product._id)) ? "text-amber-400" : "text-white"}
-                      fill={wishlistIds.has(String(product._id)) ? "currentColor" : "none"}
-                    />
-                  </button>
-
-                </div>
-
-
-                {/* ========================================== */}
-                {/* PRODUCT DETAILS */}
-                {/* ========================================== */}
-
-                <div className="p-5">
-
-
-                  {/* PRODUCT NAME */}
-
-                  <h2 className="
-                    text-xl
-                    text-white
-                    font-semibold
-                    truncate
-                  ">
-                    {product.name}
-                  </h2>
-
-
-                  {/* ========================================== */}
-                  {/* RATING */}
-                  {/* ========================================== */}
-
-                  <div className="mt-2">
-
-                    <RatingStars
-                      rating={product.rating}
-                    />
-
-                  </div>
-
-
-                  {/* DESCRIPTION */}
-
-                  <p className="
-                    text-slate-400
-                    text-sm
-                    mt-3
-                    line-clamp-2
-                  ">
-                    {product.description}
-                  </p>
-
-
-                  {/* ========================================== */}
-                  {/* PRICE + STOCK */}
-                  {/* ========================================== */}
-
-                  <div className="
-                    mt-4
-                    flex
-                    items-center
-                    justify-between
-                    gap-3
-                  ">
-
-
-                    {/* PRICE */}
-
-                    <h3 className="
-                      text-amber-500
-                      text-2xl
-                      font-bold
-                    ">
-                      PKR{" "}
-                      {product.price?.toLocaleString()}
-                    </h3>
-
-
-                    {/* STOCK */}
-
-                    <span className="
-                      rounded-full
-                      bg-slate-700
-                      px-2.5
-                      py-1
-                      text-xs
-                      text-slate-200
-                      whitespace-nowrap
-                    ">
-                      Stock: {product.quantity || 0}
-                    </span>
-
-                  </div>
-
-
-                  {/* ========================================== */}
-                  {/* BUY NOW */}
-                  {/* ========================================== */}
-
-                  <button
-                    onClick={(e) => {
-
-                      e.stopPropagation();
-
-                      setSelectedProduct(product);
-
-                    }}
-                    className="
-                      w-full
-                      mt-5
-                      bg-amber-500
-                      hover:bg-amber-600
-                      py-3
-                      rounded-lg
-                      text-white
-                      font-semibold
+                      bg-slate-800
+                      rounded-xl
+                      overflow-hidden
+                      border
+                      border-slate-700
+                      hover:border-amber-500
                       transition
+                      cursor-pointer
                     "
                   >
-                    Buy Now
-                  </button>
 
 
-                </div>
+                    {/* ========================================== */}
+                    {/* PRODUCT IMAGE */}
+                    {/* ========================================== */}
 
-              </div>
+                    <div className="
+                      relative
+                    ">
 
-            ))}
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="
+                          h-48
+                          w-full
+                          object-cover
+                        "
+                      />
+
+
+                      {/* CATEGORY BADGE */}
+
+                      <span className="
+                        absolute
+                        top-3
+                        left-3
+                        bg-slate-950/80
+                        backdrop-blur-sm
+                        text-slate-200
+                        px-3
+                        py-1
+                        rounded-full
+                        text-xs
+                        font-medium
+                      ">
+                        {product.category}
+                      </span>
+
+
+                      {/* ========================================== */}
+                      {/* WISHLIST HEART */}
+                      {/* ========================================== */}
+
+                      <button
+                        type="button"
+                        aria-label={
+                          isWishlisted
+                            ? "Remove from wishlist"
+                            : "Add to wishlist"
+                        }
+                        disabled={
+                          isWishlistLoading
+                        }
+                        onClick={(e) => {
+
+                          // Card ka onClick trigger nahi hoga
+                          e.stopPropagation();
+
+                          toggleWishlist(
+                            product._id
+                          );
+
+                        }}
+                        className="
+                          absolute
+                          top-3
+                          right-3
+                          flex
+                          h-10
+                          w-10
+                          items-center
+                          justify-center
+                          rounded-full
+                          bg-slate-950/80
+                          text-white
+                          backdrop-blur-sm
+                          transition
+                          hover:bg-slate-950
+                          disabled:cursor-wait
+                          disabled:opacity-70
+                        "
+                      >
+
+                        <Heart
+                          size={21}
+                          className={
+                            isWishlisted
+                              ? "text-amber-400"
+                              : "text-white"
+                          }
+                          fill={
+                            isWishlisted
+                              ? "currentColor"
+                              : "none"
+                          }
+                        />
+
+                      </button>
+
+                    </div>
+
+
+                    {/* ========================================== */}
+                    {/* PRODUCT DETAILS */}
+                    {/* ========================================== */}
+
+                    <div className="p-5">
+
+
+                      {/* PRODUCT NAME */}
+
+                      <h2 className="
+                        text-xl
+                        text-white
+                        font-semibold
+                        truncate
+                      ">
+                        {product.name}
+                      </h2>
+
+
+                      {/* RATING */}
+
+                      <div className="mt-2">
+
+                        <RatingStars
+                          rating={
+                            product.rating
+                          }
+                        />
+
+                      </div>
+
+
+                      {/* DESCRIPTION */}
+
+                      <p className="
+                        text-slate-400
+                        text-sm
+                        mt-3
+                        line-clamp-2
+                      ">
+                        {product.description}
+                      </p>
+
+
+                      {/* ========================================== */}
+                      {/* PRICE + STOCK */}
+                      {/* ========================================== */}
+
+                      <div className="
+                        mt-4
+                        flex
+                        items-center
+                        justify-between
+                        gap-3
+                      ">
+
+
+                        {/* PRICE */}
+
+                        <h3 className="
+                          text-amber-500
+                          text-2xl
+                          font-bold
+                        ">
+                          PKR{" "}
+                          {product.price?.toLocaleString()}
+                        </h3>
+
+
+                        {/* STOCK */}
+
+                        <span className="
+                          rounded-full
+                          bg-slate-700
+                          px-2.5
+                          py-1
+                          text-xs
+                          text-slate-200
+                          whitespace-nowrap
+                        ">
+                          Stock:{" "}
+                          {product.quantity || 0}
+                        </span>
+
+                      </div>
+
+
+                      {/* ========================================== */}
+                      {/* BUY NOW */}
+                      {/* ========================================== */}
+
+                      <button
+                        onClick={(e) => {
+
+                          e.stopPropagation();
+
+                          setSelectedProduct(
+                            product
+                          );
+
+                        }}
+                        className="
+                          w-full
+                          mt-5
+                          bg-amber-500
+                          hover:bg-amber-600
+                          py-3
+                          rounded-lg
+                          text-white
+                          font-semibold
+                          transition
+                        "
+                      >
+                        Buy Now
+                      </button>
+
+
+                    </div>
+
+                  </div>
+
+                );
+
+              }
+            )}
 
           </div>
 
