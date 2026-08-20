@@ -11,9 +11,10 @@ const startAuctionScheduler = () => {
 
             const auctions = await Auction.find({
                 approvalStatus: "approved",
-                auctionStatus: {
-                    $in: ["upcoming", "live"]
-                }
+                $or: [
+                    { auctionStatus: { $in: ["upcoming", "live"] } },
+                    { auctionStatus: "ended", winnerId: null, "bids.0": { $exists: true } }
+                ]
             });
 
             for (const auction of auctions) {
@@ -29,6 +30,30 @@ const startAuctionScheduler = () => {
                     60 *
                     1000
                 );
+
+                // Backfill auctions that ended before winner persistence was added.
+                if (
+                    auction.auctionStatus === "ended" &&
+                    !auction.winnerId &&
+                    auction.bids.length > 0
+                ) {
+                    const winningBid = auction.bids.reduce(
+                        (highestBid, bid) =>
+                            !highestBid || bid.amount > highestBid.amount
+                                ? bid
+                                : highestBid,
+                        null
+                    );
+
+                    auction.winnerId = winningBid.bidderId;
+                    await auction.save();
+
+                    console.log(
+                        `Winner backfilled for auction ${auction._id}: ${auction.winnerId}`
+                    );
+
+                    continue;
+                }
 
 
                 // ==============================
@@ -62,10 +87,27 @@ const startAuctionScheduler = () => {
 
                     auction.auctionStatus = "ended";
 
+                    // The last/highest bid wins when the auction ends.
+                    const winningBid = auction.bids.reduce(
+                        (highestBid, bid) =>
+                            !highestBid || bid.amount > highestBid.amount
+                                ? bid
+                                : highestBid,
+                        null
+                    );
+
+                    console.log(
+                        `Auction ${auction._id} has ENDED. Winning Bid: ${winningBid ? winningBid.amount : "No bids"}`
+                    );
+
+                    auction.winnerId = winningBid
+                        ? winningBid.bidderId
+                        : null;
+
                     await auction.save();
 
                     console.log(
-                        `Auction ${auction._id} has ENDED`
+                        `Auction ${auction._id} has ENDED. Winner: ${auction.winnerId || "No bids"}`
                     );
                 }
 

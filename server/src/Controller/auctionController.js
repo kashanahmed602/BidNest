@@ -373,13 +373,17 @@ const placeBid = async (req, res) => {
         // Emit real-time update to connected clients
         try {
             const io = req.app && req.app.get && req.app.get("io");
+            const payload = {
+                auctionId: auction._id,
+                currentBid: auction.currentBid,
+                bidderName: req.user && req.user.name ? req.user.name : "Someone",
+                bidderId: req.user && req.user._id ? String(req.user._id) : null
+            };
             if (io) {
-                io.emit("bidPlaced", {
-                    auctionId: auction._id,
-                    currentBid: auction.currentBid,
-                    bidderName: req.user && req.user.name ? req.user.name : "Someone",
-                    bidderId: req.user && req.user._id ? String(req.user._id) : null
-                });
+                console.log("Emitting bidPlaced:", payload);
+                io.emit("bidPlaced", payload);
+            } else {
+                console.warn("Socket.io instance not found on app to emit bidPlaced");
             }
         } catch (emitError) {
             console.error("Error emitting bidPlaced:", emitError);
@@ -402,5 +406,6 @@ const placeBid = async (req, res) => {
 
     }
 };
+
 
 module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete, getAuctionById, getPendingAuction, editAuction, placeBid }; 

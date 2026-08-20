@@ -10,6 +10,7 @@ const LiveAuctions = () => {
 
   const [liveAuctions, setLiveAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [biddingAuctionId, setBiddingAuctionId] = useState(null);
 
 
   // ==========================================
@@ -56,6 +57,10 @@ const LiveAuctions = () => {
   }, []);
 
   const placeBid = async (auctionId, bid) => {
+    if (biddingAuctionId) return;
+
+    setBiddingAuctionId(auctionId);
+
     try{
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/placeBid`, {
         auctionId: auctionId,
@@ -67,19 +72,14 @@ const LiveAuctions = () => {
       });
 
       const newCurrentBid = response.data.currentBid;
+      const currentUser = JSON.parse(localStorage.getItem("user") || "null");
 
       // Optimistically update UI for current user
       setLiveAuctions(prev => prev.map(a => a._id === auctionId ? {
         ...a,
         currentBid: newCurrentBid,
-        lastBidderName: "You",
-        lastBidderId: (() => {
-          try{
-            const token = localStorage.getItem("token") || "";
-            const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
-            return payload.id || null;
-          }catch(e){ return null }
-        })()
+        lastBidderName: currentUser?.name || "Someone",
+        lastBidderId: currentUser?._id ? String(currentUser._id) : getCurrentUserId()
       } : a));
 
       alert("Bid Placed Successfully");
@@ -87,12 +87,17 @@ const LiveAuctions = () => {
     }catch(error){
       alert("Error Placing Bid: " + error.message)
 
+    }finally{
+      setBiddingAuctionId(null);
     }
   }
 
   // Get current user id from token (safe decode)
   const getCurrentUserId = () => {
     try{
+      const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+      if (storedUser?._id) return String(storedUser._id);
+
       const token = localStorage.getItem("token") || "";
       if(!token) return null;
       const base64Url = token.split(".")[1];
@@ -101,7 +106,7 @@ const LiveAuctions = () => {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
       }).join(''));
       const payload = JSON.parse(jsonPayload);
-      return payload.id || null;
+      return payload.id ? String(payload.id) : null;
     }catch(e){
       return null;
     }
@@ -126,15 +131,19 @@ const LiveAuctions = () => {
       }
 
       socket = io(origin, { transports: ["websocket"] });
+      // expose for debugging across tabs
+      try { window.__auctionSocket = socket } catch(e) {}
 
       socket.on("bidPlaced", (data) => {
+        console.log("socket received bidPlaced:", data);
         const { auctionId, currentBid, bidderName, bidderId } = data;
         setLiveAuctions(prev => prev.map(a => a._id === auctionId ? {
           ...a,
           currentBid: currentBid,
           lastBidderName: bidderName,
-          lastBidderId: bidderId
+          lastBidderId: bidderId ? String(bidderId) : null
         } : a));
+
       });
     }catch(err){
       console.warn("Socket init failed:", err);
@@ -144,6 +153,7 @@ const LiveAuctions = () => {
       if(socket && socket.disconnect) socket.disconnect();
     }
   }, []);
+
 
 
   // ==========================================
@@ -727,6 +737,7 @@ const LiveAuctions = () => {
 
                     <button
                       value={auction.minBidAmount}
+                      disabled={biddingAuctionId === auction._id}
                       onClick={(e) => {
 
                         e.stopPropagation();
@@ -738,6 +749,8 @@ const LiveAuctions = () => {
                         mt-5
                         bg-amber-500
                         hover:bg-amber-600
+                        disabled:bg-amber-500/60
+                        disabled:cursor-not-allowed
                         text-white
                         font-semibold
                         py-3
@@ -745,7 +758,14 @@ const LiveAuctions = () => {
                         transition
                       "
                     >
-                      Place Bid
+                      {biddingAuctionId === auction._id ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                          Placing Bid...
+                        </span>
+                      ) : (
+                        "Place Bid"
+                      )}
                     </button>
 
             )}
