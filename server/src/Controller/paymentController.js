@@ -1,5 +1,6 @@
 const safepay = require("../Config/safePay");
 const Product = require("../Models/productsModel");
+const Auction = require("../Models/auctionModel");
 const Order = require("../Models/paymentModel");
 const axios = require("axios");
 
@@ -13,13 +14,13 @@ const CLIENT_URL =
 const createPayment = async (req, res) => {
   try {
 
-    const { productId, paymentMethod, quantity = 1 } = req.body;
+    const { productId, auctionId, paymentMethod, quantity = 1 } = req.body;
 
     // ----------------------------------------
     // 1. Validate request
     // ----------------------------------------
 
-    if (!productId || !paymentMethod) {
+    if ((!productId && !auctionId) || (productId && auctionId) || !paymentMethod) {
       return res.status(400).json({
         success: false,
         message: "Product ID and payment method are required"
@@ -44,51 +45,39 @@ const createPayment = async (req, res) => {
     // 3. Safepay credentials
     // ----------------------------------------
 
-    const merchantApiKey =
-      process.env.SAFEPAY_PUBLIC_KEY?.trim();
+    const isAuction = Boolean(auctionId);
+    const item = isAuction
+      ? await Auction.findOne({ _id: auctionId, winnerId: req.user.id, auctionStatus: "ended" })
+      : await Product.findById(productId);
 
-    const secretKey =
-      process.env.SAFEPAY_SECRET_KEY?.trim();
-
-    if (!merchantApiKey || !secretKey) {
-      return res.status(500).json({
-        success: false,
-        message:
-          "Safepay credentials are not configured on the server"
-      });
-    }
-
-    // ----------------------------------------
-    // 4. Find product
-    // ----------------------------------------
-
-    const product =
-      await Product.findById(productId);
-
-    if (!product) {
+    if (!item) {
       return res.status(404).json({
         success: false,
-        message: "Product not found"
+        message: isAuction ? "Won auction not found" : "Product not found"
       });
     }
 
     const requestedQuantity = Number(quantity) || 1;
 
-    if (requestedQuantity < 1) {
+    if (requestedQuantity < 1 || (isAuction && requestedQuantity !== 1)) {
       return res.status(400).json({
         success: false,
         message: "Quantity must be at least 1"
       });
     }
 
-    if (requestedQuantity > Number(product.quantity || 0)) {
+    if (!isAuction && requestedQuantity > Number(item.quantity || 0)) {
       return res.status(400).json({
         success: false,
         message: `Only ${product.quantity} item(s) available in stock`
       });
     }
 
-    const totalAmount = Number(product.price) * requestedQuantity;
+    const totalAmount = Number(isAuction ? item.currentBid : item.price) * requestedQuantity;
+
+    if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid payment amount" });
+    }
 
     // ========================================
     // CASH ON DELIVERY
@@ -98,13 +87,15 @@ const createPayment = async (req, res) => {
 
       const order = await Order.create({
 
-        productId: product._id,
+        productId: isAuction ? undefined : item._id,
 
-        productName: product.name,
+        auctionId: isAuction ? item._id : null,
+
+        productName: item.name,
 
         buyerId: req.user.id,
 
-        sellerId: product.userId,
+        sellerId: isAuction ? item.sellerId : item.userId,
 
         amount: totalAmount,
 
@@ -129,6 +120,13 @@ const createPayment = async (req, res) => {
         order: order
 
       });
+    }
+
+    const merchantApiKey = process.env.SAFEPAY_PUBLIC_KEY?.trim();
+    const secretKey = process.env.SAFEPAY_SECRET_KEY?.trim();
+
+    if (!merchantApiKey || !secretKey) {
+      return res.status(500).json({ success: false, message: "Safepay credentials are not configured on the server" });
     }
 
     // ========================================
@@ -194,13 +192,15 @@ const createPayment = async (req, res) => {
     const order =
       await Order.create({
 
-        productId: product._id,
+        productId: isAuction ? undefined : item._id,
 
-        productName: product.name,
+        auctionId: isAuction ? item._id : null,
+
+        productName: item.name,
 
         buyerId: req.user.id,
 
-        sellerId: product.userId,
+        sellerId: isAuction ? item.sellerId : item.userId,
 
         amount: totalAmount,
 
@@ -396,7 +396,7 @@ const safepayWebhook = async (req, res) => {
 
 
 const reduceProductStockForPaidOrder = async (order) => {
-  if (!order || order.paymentStatus === "paid") {
+  if (!order || order.paymentStatus === "paid" || order.auctionId) {
     return;
   }
 

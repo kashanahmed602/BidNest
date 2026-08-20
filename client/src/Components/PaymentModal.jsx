@@ -8,8 +8,9 @@ const PaymentModal = ({
 
   const [loading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const isAuction = Boolean(product.isAuction);
 
-  const maxQuantity = Number(product.quantity || 0);
+  const maxQuantity = isAuction ? 1 : Number(product.quantity || 0);
   const totalAmount = Number(product.price || 0) * quantity;
 
   const handlePayment = async (paymentMethod) => {
@@ -21,7 +22,9 @@ const PaymentModal = ({
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/paymentCreate`,
         {
-          productId: product._id,
+          ...(product.isAuction
+            ? { auctionId: product._id }
+            : { productId: product._id }),
           paymentMethod: paymentMethod,
           quantity
         },
@@ -150,18 +153,21 @@ const PaymentModal = ({
                 {product.category}
               </p>
 
-              <p className="mt-2 text-sm text-slate-300">
-                Available: {maxQuantity}
-              </p>
+              {!isAuction && (
+                <p className="mt-2 text-sm text-slate-300">
+                  Available: {maxQuantity}
+                </p>
+              )}
 
               <p className="mt-2 text-lg font-bold text-amber-500">
-                PKR {product.price?.toLocaleString()} each
+                PKR {product.price?.toLocaleString()} {isAuction ? "winning bid" : "each"}
               </p>
 
             </div>
 
           </div>
 
+          {!isAuction && (
           <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900 p-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-300">Quantity</span>
@@ -191,6 +197,7 @@ const PaymentModal = ({
               <span className="font-bold text-amber-500">PKR {totalAmount.toLocaleString()}</span>
             </div>
           </div>
+          )}
 
         </div>
 

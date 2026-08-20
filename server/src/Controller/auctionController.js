@@ -407,5 +407,34 @@ const placeBid = async (req, res) => {
     }
 };
 
+const getWinner = async (req, res) => {
+    try{
+        const winner = await Auction.find({
+            winnerId: { $eq: req.user.id},
+            auctionStatus: "ended"
+        }).populate("sellerId", "name email");
 
-module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete, getAuctionById, getPendingAuction, editAuction, placeBid }; 
+        if(!winner || winner.length === 0){
+            return res.status(200).json({
+                success: true,
+                message: "No Winning Auctions"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Winning Auctions Fetched Successfully",
+            auctions: winner
+        });
+
+    }catch(error){
+        console.error("Get Winner Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+}
+
+
+module.exports =  {createAuction, getAuctions, updateAuction, marketAuctions, auctionDelete, getAuctionById, getPendingAuction, editAuction, placeBid, getWinner };
