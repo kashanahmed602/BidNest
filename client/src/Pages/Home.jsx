@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PaymentModal from "../Components/PaymentModal";
+import { Heart } from "lucide-react";
 
 const Marketplace = () => {
 
@@ -13,6 +14,47 @@ const Marketplace = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [wishlistIds, setWishlistIds] = useState(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      return new Set((user.wishlist || []).map((item) => String(item.productId)));
+    } catch {
+      return new Set();
+    }
+  });
+  const [wishlistLoading, setWishlistLoading] = useState(null);
+
+  const addtoWishlist = async (productId) => {
+    if (wishlistIds.has(String(productId)) || wishlistLoading === productId) {
+      return;
+    }
+
+    try{
+      setWishlistLoading(productId);
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/addInToWishlist`, { productId }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      setWishlistIds((currentIds) => {
+        const nextIds = new Set(currentIds);
+        nextIds.add(String(productId));
+        return nextIds;
+      });
+
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      localStorage.setItem("user", JSON.stringify({
+        ...user,
+        wishlist: response.data.wishlist || user.wishlist || []
+      }));
+      alert("Product Added To Wishlist");
+    }catch(error){
+      alert("Error Adding to Wishlist");
+    } finally {
+      setWishlistLoading(null);
+    }
+  }
 
 
   // ==========================================
@@ -531,6 +573,23 @@ const Marketplace = () => {
                   ">
                     {product.category}
                   </span>
+
+                  <button
+                    type="button"
+                    aria-label={wishlistIds.has(String(product._id)) ? "Added to wishlist" : "Add to wishlist"}
+                    disabled={wishlistLoading === product._id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addtoWishlist(product._id);
+                    }}
+                    className="absolute top-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/80 text-white backdrop-blur-sm transition hover:bg-slate-950 disabled:cursor-wait disabled:opacity-70"
+                  >
+                    <Heart
+                      size={21}
+                      className={wishlistIds.has(String(product._id)) ? "text-amber-400" : "text-white"}
+                      fill={wishlistIds.has(String(product._id)) ? "currentColor" : "none"}
+                    />
+                  </button>
 
                 </div>
 

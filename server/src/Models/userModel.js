@@ -38,6 +38,15 @@ const userSchema = new mongoose.Schema({
         default: "pending"
     },
 
+    wishlist: [
+        {
+            productId:{
+                type: mongoose.Schema.Types.ObjectId,
+                required: true
+            }
+        }
+    ]
+
 },
 
     {

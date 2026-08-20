@@ -1,4 +1,5 @@
 const User = require("../Models/userModel");
+const Product = require("../Models/productsModel");
 const bycrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -173,6 +174,45 @@ const updateStatus = async (req, res) => {
     }
 }
 
+const addToWishlist = async(req, res) => {
+    const { productId } = req.body;
 
+    try{
+        const user = await User.find({_id: req.user.id, status: "approved"});
 
-module.exports = {registerUser, loginUser, loginAdmin, getUsers, updateStatus};
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "User Not Exists"
+            });
+        }
+
+        const product = await Product.findById({_id: productId, status: "approved"});
+
+        if(!product){
+            return res.status(404).json({
+                success: false,
+                message: "Product Not Exists"
+            })
+        }
+
+        const wishlistItem = await User.findByIdAndUpdate(
+            req.user.id,
+            {$push: {wishlist: {productId}}},
+            {new: true}
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Product Added to Wishlist",
+            wishlist: wishlistItem.wishlist
+        })
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+}
+
+module.exports = {registerUser, loginUser, loginAdmin, getUsers, updateStatus, addToWishlist};
