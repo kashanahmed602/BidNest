@@ -5,34 +5,35 @@ import {
   Heart,
 } from "lucide-react";
 
-const cards = [
+
+const DashboardCards = ({products, auctions, winner, wishlist}) => {
+
+  const cards = [
   {
     title: "My Products",
-    value: 12,
+    value: products?.length,
     icon: <Package size={28} />,
     color: "text-blue-400",
   },
   {
     title: "Active Bids",
-    value: 8,
+    value: auctions?.length,
     icon: <Gavel size={28} />,
     color: "text-amber-400",
   },
   {
     title: "Won Auctions",
-    value: 3,
+    value: winner?.length,
     icon: <Trophy size={28} />,
     color: "text-green-400",
   },
   {
     title: "Wishlist",
-    value: 18,
+    value: wishlist?.length,
     icon: <Heart size={28} />,
     color: "text-red-400",
   },
 ];
-
-const DashboardCards = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
