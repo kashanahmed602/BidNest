@@ -48,14 +48,22 @@ const loginUser = async (req, res) => {
 
     try {
         const user = await User.findOne({email, role: "user"});
-        const isPasswordValid = await bycrypt.compare(password, user.password);
-
-        if(!user && !isPasswordValid){
+        if(!user){
             return res.status(400).json({
                 success: false,
                 message: "Invalid Email or Password"
             });
         }
+        const isPasswordValid = await bycrypt.compare(password, user.password);
+
+        if(!isPasswordValid){
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Email or Password"
+            });
+        }
+
+        
 
         const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
             expiresIn: "2h"
@@ -139,6 +147,108 @@ const getUsers = async (req, res) => {
 
 };
 
+const userProfile = async (req, res) => {
+    try{
+        const user = await User.findById(req.user.id);
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "User Not Found"
+            });
+        }
+
+        res.status(200).json(
+            {
+                success: true,
+                message: "User Fetched Successfully",
+                user: user
+            }
+        )
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+}
+
+const updateProfile = async (req, res) => {
+    const { name, email, phone} = req.body;
+
+    try{
+        const user = await User.findByIdAndUpdate(req.user.id,
+            { name, email, phone },
+            { new : true}
+        );
+
+        if(!user){
+            return res.status(404).json({
+                success: false,
+                message: "User Not Found"
+        });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User Updated Successfully",
+            user: user
+        })
+
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+};
+
+const updatePassword = async (req, res) => {
+
+    const { oldPassword, newPassword } = req.body;
+
+    try{
+        const userPassword = await User.findById(req.user.id);
+
+        if(!userPassword){
+            return res.status(404).json({
+                success: false,
+                messgae: "User Not Exits"
+            });
+        }
+
+        const isPasswordValid = await bycrypt.compare(oldPassword, userPassword.password);
+
+        if(!isPasswordValid){
+            return res.status(400).json({
+                success: false,
+                message: "Old Password is not match with the Current Password"
+            });
+        }
+
+        const hashedPassword = await bycrypt.hash(newPassword, 10);
+
+        const updatePassword = await User.findByIdAndUpdate(req.user.id,
+            { password: hashedPassword},
+            { new: true }
+        )
+
+        res.status(200).json({
+            success: true,
+            message: "Password Updated Successfully",
+            user: updatePassword
+        });
+ 
+
+    }catch(error){
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+};
 
 const updateStatus = async (req, res) => {
     const {id} = req.params;
@@ -285,4 +395,4 @@ const getWishlist = async (req, res) => {
     }
 };
 
-module.exports = {registerUser, loginUser, loginAdmin, getUsers, updateStatus, addToWishlist, removeFromWishlist, getWishlist};
+module.exports = {registerUser, loginUser, loginAdmin, getUsers, updateStatus, addToWishlist, removeFromWishlist, getWishlist, userProfile, updateProfile, updatePassword};
