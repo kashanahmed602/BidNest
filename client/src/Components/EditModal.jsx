@@ -38,7 +38,7 @@ const EditProductModal = ({ product, closeModal }) => {
         formData.append("gallery", file);
       });
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("accessToken");
 
       const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/productUpdate/${product._id}`,

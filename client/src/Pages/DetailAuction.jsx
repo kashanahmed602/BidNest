@@ -17,7 +17,7 @@ const AuctionDetails = () => {
           `${import.meta.env.VITE_API_URL}/auction/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );

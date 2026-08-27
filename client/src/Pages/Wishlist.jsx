@@ -27,7 +27,7 @@ const Wishlist = () => {
           {
             headers: {
               Authorization:
-                `Bearer ${localStorage.getItem("token")}`,
+                `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );

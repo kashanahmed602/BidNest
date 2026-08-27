@@ -20,7 +20,7 @@ const MyBids = () => {
         `${import.meta.env.VITE_API_URL}/auctions`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
           }
         }
       );
@@ -39,7 +39,7 @@ const MyBids = () => {
     try{
       const response = await axios.delete(`${import.meta.env.VITE_API_URL}/deletAuction/${id}`,{
         headers: {
-           Authorization: `Bearer ${localStorage.getItem("token")}`,
+           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           }
       });
 

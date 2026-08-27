@@ -81,7 +81,7 @@ const Marketplace = () => {
           {
             headers: {
               Authorization:
-                `Bearer ${localStorage.getItem("token")}`
+                `Bearer ${localStorage.getItem("accessToken")}`
             }
           }
         );
@@ -135,7 +135,7 @@ const Marketplace = () => {
           {
             headers: {
               Authorization:
-                `Bearer ${localStorage.getItem("token")}`
+                `Bearer ${localStorage.getItem("accessToken")}`
             }
           }
         );
@@ -298,7 +298,7 @@ const Marketplace = () => {
             {
               headers: {
                 Authorization:
-                  `Bearer ${localStorage.getItem("token")}`,
+                  `Bearer ${localStorage.getItem("accessToken")}`,
               }
             }
           );

@@ -12,7 +12,7 @@ const WonAuctions = () => {
   useEffect(() => {
     const getWinner = async () => {
       try{
-        const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
+        const headers = { Authorization: `Bearer ${localStorage.getItem("accessToken")}` };
         const [winnerResponse, ordersResponse] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/getWinner`, { headers }),
           axios.get(`${import.meta.env.VITE_API_URL}/orders`, { headers }),

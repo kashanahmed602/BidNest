@@ -30,7 +30,7 @@ const PaymentModal = ({
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
           }
         }
       );

@@ -28,7 +28,7 @@ const LiveAuctions = () => {
           {
             headers: {
               Authorization:
-                `Bearer ${localStorage.getItem("token")}`,
+                `Bearer ${localStorage.getItem("accessToken")}`,
             },
           }
         );
@@ -67,7 +67,7 @@ const LiveAuctions = () => {
         bidAmount: bid
       }, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
         }
       });
 
@@ -98,7 +98,7 @@ const LiveAuctions = () => {
       const storedUser = JSON.parse(localStorage.getItem("user") || "null");
       if (storedUser?._id) return String(storedUser._id);
 
-      const token = localStorage.getItem("token") || "";
+      const token = localStorage.getItem("accessToken") || "";
       if(!token) return null;
       const base64Url = token.split(".")[1];
       const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");

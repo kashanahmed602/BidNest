@@ -12,8 +12,8 @@ router.get("/users", apiLimiter, getUsers);
 router.put("/updateStatus/:id", apiLimiter, updateStatus);
 router.put("/addInToWishlist",apiLimiter, auth, addToWishlist);
 router.put("/removeFromWishlist", apiLimiter, auth, removeFromWishlist);
-router.get("/wishlist", apiLimiter, getWishlist);
-router.get("/profile", apiLimiter, userProfile);
+router.get("/wishlist", apiLimiter,auth, getWishlist);
+router.get("/profile", apiLimiter,auth, userProfile);
 router.put("/profileUpdate",apiLimiter, auth, updateProfile);
 router.put("/updatePassword", apiLimiter, auth, updatePassword);
 

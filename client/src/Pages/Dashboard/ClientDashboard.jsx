@@ -13,7 +13,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async  () => {
     try{
-      const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
+      const headers = { Authorization: `Bearer ${localStorage.getItem("accessToken")}` };
     const [ productResponse, auctionResponse, winnerResponse, wishlistResponse ] = await Promise.all([
       axios.get(`${import.meta.env.VITE_API_URL}/products`, {headers}),
       axios.get(`${import.meta.env.VITE_API_URL}/auctions`, {headers}),

@@ -65,15 +65,26 @@ const loginUser = async (req, res) => {
 
         
 
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
-            expiresIn: "2h"
+        const accessToken = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
+            expiresIn: "15m"
         });
 
         res.status(200).json({
             success: true,
             message: "User Logged In Successfully",
-            token: token,
+            accessToken,
             user:user
+        })
+
+        const refreshToken = jwt.sign({id: user._id}, process.env.JWT_SECRET_REFRESH, {
+            expiresIn: "7d"
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
     }catch(error){
@@ -390,8 +401,9 @@ const getWishlist = async (req, res) => {
     }catch(error){
         res.status(500).json({
             success: false,
-            message: "Internal Server Error"
+            message: "Internal Server Error",
         });
+        console.log("Error Fetching Wishlist:", error.message)
     }
 };
 

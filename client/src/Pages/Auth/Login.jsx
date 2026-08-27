@@ -22,13 +22,13 @@ const Login = () => {
             setEmail("");
             setPassword("");
 
-            const { token, user } = response.data;
+            const { accessToken, user } = response.data;
 
-            console.log(token)
+            console.log(accessToken)
             console.log(user)
 
 
-            localStorage.setItem("token", token);
+            localStorage.setItem("accessToken", accessToken);
             localStorage.setItem("user", JSON.stringify(user));
 
             if(user.status === "approved"){

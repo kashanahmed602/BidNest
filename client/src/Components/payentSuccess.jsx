@@ -74,7 +74,7 @@ const PaymentSuccess = ({ isCancelled = false }) => {
           {
             headers: {
               Authorization:
-                `Bearer ${localStorage.getItem("token")}`
+                `Bearer ${localStorage.getItem("accessToken")}`
             }
           }
 

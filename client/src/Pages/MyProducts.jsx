@@ -21,7 +21,7 @@ const MyProducts = () => {
 
                 const response = await axios.get(`${import.meta.env.VITE_API_URL}/products`,{
                   headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
                   }
                 });
 
