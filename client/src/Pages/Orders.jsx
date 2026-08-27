@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import SidebarLayout from "../Layout/SidebarLayout";
+import api from "../api/axios";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -14,14 +15,8 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/myOrders`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
-      );
+      const response = await api.get(
+        `${import.meta.env.VITE_API_URL}/myOrders`);
 
       setOrders(response.data.orders || []);
     } catch (error) {
@@ -176,15 +171,10 @@ const Orders = () => {
     try {
       setUpdatingId(orderId);
 
-      const response = await axios.put(
+      const response = await api.put(
         `${import.meta.env.VITE_API_URL}/updateOrderPaymentStatus/${orderId}`,
         {
           paymentStatus,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
         }
       );
 
@@ -215,15 +205,10 @@ const Orders = () => {
     try {
       setUpdatingId(orderId);
 
-      const response = await axios.put(
+      const response = await api.put(
         `${import.meta.env.VITE_API_URL}/updateOrderProductStatus/${orderId}`,
         {
           productStatus,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
         }
       );
 

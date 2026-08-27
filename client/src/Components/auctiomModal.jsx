@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import axios from 'axios';
+import api from "../api/axios";
 
 const AuctionModal = ({ closeModal }) => {
   const fileInputRef = useRef(null);
@@ -31,14 +32,8 @@ gallery.forEach((file) => {
     
       const token = localStorage.getItem("accessToken");
 
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/createAuction`,
-            formData,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "multipart/form-data",
-                },
-        })
+        const response = await api.post(`${import.meta.env.VITE_API_URL}/createAuction`,
+            formData)
 
 
     alert("Auction Submitted Successfully");

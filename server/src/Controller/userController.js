@@ -69,14 +69,7 @@ const loginUser = async (req, res) => {
             expiresIn: "15m"
         });
 
-        res.status(200).json({
-            success: true,
-            message: "User Logged In Successfully",
-            accessToken,
-            user:user
-        })
-
-        const refreshToken = jwt.sign({id: user._id}, process.env.JWT_SECRET_REFRESH, {
+         const refreshToken = jwt.sign({id: user._id}, process.env.JWT_SECRET_REFRESH, {
             expiresIn: "7d"
         });
 
@@ -85,6 +78,13 @@ const loginUser = async (req, res) => {
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+
+        res.status(200).json({
+            success: true,
+            message: "User Logged In Successfully",
+            accessToken,
+            user:user
         })
 
     }catch(error){

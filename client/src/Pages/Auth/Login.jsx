@@ -3,6 +3,7 @@ import { Mail, Lock } from "lucide-react";
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from "react-router-dom";
+import api from "../../api/axios";
 
 const Login = () => {
     const navigate = useNavigate();
@@ -13,7 +14,7 @@ const Login = () => {
         e.preventDefault();
 
         try{
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/loginUser`, {
+            const response = await api.post(`${import.meta.env.VITE_API_URL}/loginUser`, {
                 email,
                 password
             });

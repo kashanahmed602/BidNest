@@ -5,6 +5,8 @@ import {
   useLocation
 } from "react-router-dom";
 import axios from "axios";
+import api from "../api/axios";
+
 
 const PaymentSuccess = ({ isCancelled = false }) => {
 
@@ -62,20 +64,13 @@ const PaymentSuccess = ({ isCancelled = false }) => {
         // VERIFY PAYMENT
         // ======================================
 
-        const response = await axios.post(
+        const response = await api.post(
 
           `${import.meta.env.VITE_API_URL}/paymentVerify`,
 
           {
             orderId,
             tracker
-          },
-
-          {
-            headers: {
-              Authorization:
-                `Bearer ${localStorage.getItem("accessToken")}`
-            }
           }
 
         );

@@ -1,10 +1,12 @@
 import axios from "axios";
 import { useState } from "react";
+import api from "../api/axios";
+
 
 const PaymentModal = ({
   product,
   onClose
-}) => {
+}) => { 
 
   const [loading, setLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -19,7 +21,7 @@ const PaymentModal = ({
 
       setLoading(true);
 
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_API_URL}/paymentCreate`,
         {
           ...(product.isAuction
@@ -27,11 +29,6 @@ const PaymentModal = ({
             : { productId: product._id }),
           paymentMethod: paymentMethod,
           quantity
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-          }
         }
       );
 

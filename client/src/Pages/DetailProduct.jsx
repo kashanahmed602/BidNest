@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import SidebarLayout from "../Layout/SidebarLayout";
 import axios from "axios";
+import api from "../api/axios";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -23,13 +24,8 @@ const ProductDetails = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/product/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
+      const response = await api.get(
+        `${import.meta.env.VITE_API_URL}/product/${id}`
       );
 
       const fetchedProduct = response.data.product;
@@ -62,17 +58,12 @@ const ProductDetails = () => {
     try {
       setFeedbackLoading(true);
 
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_API_URL}/addFeedback`,
         {
           productId: id,
           rating: Number(rating),
           message: message.trim(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
         }
       );
 

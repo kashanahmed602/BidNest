@@ -5,7 +5,7 @@ import axios from "axios";
 import { Trash2, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom"
 import EditAuctionModal from "../Components/EditAuctionModal";
-
+import api from "../api/axios";
 
 const MyBids = () => {
   const navigate = useNavigate();
@@ -16,14 +16,8 @@ const MyBids = () => {
 
   const fetchAuctions = async () => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/auctions`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-          }
-        }
-      );
+      const response = await api.get(
+        `${import.meta.env.VITE_API_URL}/auctions`);
 
       setAuctions(response.data.auctions);
     } catch (error) {
@@ -37,11 +31,7 @@ const MyBids = () => {
 
   const delteAuction = async (id) => {
     try{
-      const response = await axios.delete(`${import.meta.env.VITE_API_URL}/deletAuction/${id}`,{
-        headers: {
-           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          }
-      });
+      const response = await api.delete(`${import.meta.env.VITE_API_URL}/deletAuction/${id}`);
 
       alert("Auction deleted Successfully");
       window.location.reload(true);

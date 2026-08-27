@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import SidebarLayout from "../Layout/SidebarLayout";
 import FeedbackModal from "../Components/FeedbackModal";
+import api from "../api/axios";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -16,14 +17,8 @@ const MyOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/orders`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+        const response = await api.get(
+          `${import.meta.env.VITE_API_URL}/orders`);
 
         setOrders(response.data.orders || []);
       } catch (error) {

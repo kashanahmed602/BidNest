@@ -3,6 +3,7 @@ import DashboardCards from "../../Components/DashboardCard";
 import RecentActivity from "../../Components/RecentActivity";
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import api from "../../api/axios";
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
@@ -13,12 +14,12 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async  () => {
     try{
-      const headers = { Authorization: `Bearer ${localStorage.getItem("accessToken")}` };
+      // const headers = { Authorization: `Bearer ${localStorage.getItem("accessToken")}` };
     const [ productResponse, auctionResponse, winnerResponse, wishlistResponse ] = await Promise.all([
-      axios.get(`${import.meta.env.VITE_API_URL}/products`, {headers}),
-      axios.get(`${import.meta.env.VITE_API_URL}/auctions`, {headers}),
-      axios.get(`${import.meta.env.VITE_API_URL}/getWinner`, {headers}),
-      axios.get(`${import.meta.env.VITE_API_URL}/wishlist`, {headers}),
+      api.get(`${import.meta.env.VITE_API_URL}/products`),
+      api.get(`${import.meta.env.VITE_API_URL}/auctions`),
+      api.get(`${import.meta.env.VITE_API_URL}/getWinner`),
+      api.get(`${import.meta.env.VITE_API_URL}/wishlist`),
     ]);
 
     const allProducts = productResponse.data.products || [];

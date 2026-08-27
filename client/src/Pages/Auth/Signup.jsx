@@ -3,6 +3,7 @@ import { User, Mail, Phone, Globe, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from 'axios'
 import { useNavigate } from "react-router-dom";
+import api from "../../api/axios";
 
 
 const Signup = () => {
@@ -23,7 +24,7 @@ useEffect(() => {
 
     const fetchCountries = async () => {
 
-        const response = await axios.get(
+        const response = await api.get(
             `${import.meta.env.VITE_API_URL}/countries`
         );
 
@@ -48,7 +49,7 @@ const createAccount = async (e) => {
     }
 
     try{
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/registerUser`, {
+        const response = await api.post(`${import.meta.env.VITE_API_URL}/registerUser`, {
             name,
             email,
             phone,

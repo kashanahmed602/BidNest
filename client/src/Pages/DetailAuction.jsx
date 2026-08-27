@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SidebarLayout from "../Layout/SidebarLayout";
 import axios from "axios";
+import api from "../api/axios";
+
 
 const AuctionDetails = () => {
   const { id } = useParams();
@@ -13,14 +15,8 @@ const AuctionDetails = () => {
   useEffect(() => {
     const fetchAuction = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/auction/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+        const response = await api.get(
+          `${import.meta.env.VITE_API_URL}/auction/${id}`);
 
         const fetchedAuction = response.data.auction;
 

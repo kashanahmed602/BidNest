@@ -12,7 +12,7 @@ import {
   Pencil,
   X,
 } from "lucide-react";
-
+import api from "../api/axios";
 import { NavLink } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -35,16 +35,11 @@ const Sidebar = () => {
 
   const updateProfile = async () => {
     try{
-      const update = await axios.put(`${import.meta.env.VITE_API_URL}/profileUpdate`, {
+      const update = await api.put(`${import.meta.env.VITE_API_URL}/profileUpdate`, {
         name,
         email,
         phone
-      },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          }
-        }
+      }
       );
 
       alert("User Updated Successfully");
@@ -60,14 +55,9 @@ const Sidebar = () => {
     }
 
     try{
-      const update = await axios.put(`${import.meta.env.VITE_API_URL}/updatePassword`, {
+      const update = await api.put(`${import.meta.env.VITE_API_URL}/updatePassword`, {
         oldPassword,
         newPassword: password
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-        }
       }
     )
 
@@ -90,15 +80,8 @@ const Sidebar = () => {
 
       try {
 
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/profile`,
-          {
-            headers: {
-              Authorization:
-                `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+        const response = await api.get(
+          `${import.meta.env.VITE_API_URL}/profile`);
 
         setUser(response.data.user);
 

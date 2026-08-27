@@ -2,6 +2,7 @@ import SidebarLayout from "../Layout/SidebarLayout";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import PaymentModal from "../Components/PaymentModal";
+import api from "../api/axios";
 
 const WonAuctions = () => {
   const [winner, setWinner] = useState([]);
@@ -12,10 +13,10 @@ const WonAuctions = () => {
   useEffect(() => {
     const getWinner = async () => {
       try{
-        const headers = { Authorization: `Bearer ${localStorage.getItem("accessToken")}` };
+        // const headers = { Authorization: `Bearer ${localStorage.getItem("accessToken")}` };
         const [winnerResponse, ordersResponse] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/getWinner`, { headers }),
-          axios.get(`${import.meta.env.VITE_API_URL}/orders`, { headers }),
+          api.get(`${import.meta.env.VITE_API_URL}/getWinner`),
+          api.get(`${import.meta.env.VITE_API_URL}/orders`),
         ]);
         setWinner(winnerResponse.data.auctions || []);
         setOrders(ordersResponse.data.orders || []);

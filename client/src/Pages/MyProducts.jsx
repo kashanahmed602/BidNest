@@ -5,6 +5,7 @@ import axios from 'axios'
 import { Trash2, Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import EditProductModal from "../Components/EditModal";
+import api from "../api/axios";
 
 const MyProducts = () => {
 
@@ -19,11 +20,7 @@ const MyProducts = () => {
         const fetchProducts = async () => {
             try{
 
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/products`,{
-                  headers: {
-                    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                  }
-                });
+                const response = await api.get(`${import.meta.env.VITE_API_URL}/products`);
 
                 setProducts(response.data.products);
 
@@ -37,7 +34,7 @@ const MyProducts = () => {
 
     const deleteProduct = async (id) => {
         try{
-            const response = await axios.delete(`${import.meta.env.VITE_API_URL}/productDeleted/${id}`);
+            const response = await api.delete(`${import.meta.env.VITE_API_URL}/productDeleted/${id}`);
 
             alert("Product Deleted Successfully");
             window.location.reload();

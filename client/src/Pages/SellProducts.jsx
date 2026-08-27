@@ -1,5 +1,6 @@
 import axios from 'axios'
 import {useState , useRef} from 'react'
+import api from "../api/axios";
 
 const SellProductModal = ({ closeModal }) => {
 
@@ -30,15 +31,9 @@ const SellProductModal = ({ closeModal }) => {
     
       const token = localStorage.getItem("accessToken");
 
-await axios.post(
+await api.post(
   `${import.meta.env.VITE_API_URL}/createProduct`,
-  formData,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
-    },
-  }
+  formData
 );
 
       alert("Product Created Successfully");

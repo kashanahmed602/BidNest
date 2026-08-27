@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
 const LiveAuctions = () => {
 
@@ -23,7 +24,7 @@ const LiveAuctions = () => {
 
       try {
 
-        const response = await axios.get(
+        const response = await api.get(
           `${import.meta.env.VITE_API_URL}/marketAuctions`,
           {
             headers: {
@@ -62,14 +63,11 @@ const LiveAuctions = () => {
     setBiddingAuctionId(auctionId);
 
     try{
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/placeBid`, {
+      const response = await api.post(`${import.meta.env.VITE_API_URL}/placeBid`, {
         auctionId: auctionId,
         bidAmount: bid
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-        }
-      });
+      }
+      );
 
       const newCurrentBid = response.data.currentBid;
       const currentUser = JSON.parse(localStorage.getItem("user") || "null");

@@ -1,5 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
+import api from "../api/axios";
+
+
 
 const FeedbackModal = ({ product, onClose, onSuccess }) => {
   const [rating, setRating] = useState(0);
@@ -15,17 +18,12 @@ const FeedbackModal = ({ product, onClose, onSuccess }) => {
     try {
       setLoading(true);
 
-      const response = await axios.post(
+      const response = await api.post(
         `${import.meta.env.VITE_API_URL}/rateProduct`,
         {
           productId: product.productId,
           rating,
           message: message.trim()
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-          }
         }
       );
 

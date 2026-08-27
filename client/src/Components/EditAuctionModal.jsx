@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from 'axios'
+import api from "../api/axios";
 
 const EditAuctionModal = ({ auction, closeModal }) => {
 
@@ -59,15 +60,9 @@ galleryImages.forEach((file) => {
   formData.append("gallery", file);
 });
 
-const response = await axios.put(
+const response = await api.put(
   `${import.meta.env.VITE_API_URL}/auctionUpdated/${auction._id}`,
-  formData,
-  {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-    },
-  }
-);
+  formData);
 
         alert("Auction Updated Successfully");
         closeModal(true);

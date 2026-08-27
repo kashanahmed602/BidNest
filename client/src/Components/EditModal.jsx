@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import api from "../api/axios";
 
 const EditProductModal = ({ product, closeModal }) => {
 
@@ -40,15 +41,9 @@ const EditProductModal = ({ product, closeModal }) => {
 
       const token = localStorage.getItem("accessToken");
 
-      const response = await axios.put(
+      const response = await api.put(
         `${import.meta.env.VITE_API_URL}/productUpdate/${product._id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
 
       console.log("Update Response:", response.data);

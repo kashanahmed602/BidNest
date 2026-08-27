@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaymentModal from "../Components/PaymentModal";
+import api from "../api/axios";
 
 const Wishlist = () => {
 
@@ -22,7 +23,7 @@ const Wishlist = () => {
 
       try {
 
-        const response = await axios.get(
+        const response = await api.get(
           `${import.meta.env.VITE_API_URL}/wishlist`,
           {
             headers: {

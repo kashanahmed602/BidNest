@@ -73,7 +73,7 @@ const Marketplace = () => {
 
       if (alreadyInWishlist) {
 
-        response = await axios.put(
+        response = await api.put(
           `${import.meta.env.VITE_API_URL}/removeFromWishlist`,
           {
             productId
@@ -127,16 +127,10 @@ const Marketplace = () => {
 
       else {
 
-        response = await axios.put(
+        response = await api.put(
           `${import.meta.env.VITE_API_URL}/addInToWishlist`,
           {
             productId
-          },
-          {
-            headers: {
-              Authorization:
-                `Bearer ${localStorage.getItem("accessToken")}`
-            }
           }
         );
 
@@ -293,15 +287,8 @@ const Marketplace = () => {
       try {
 
         const response =
-          await axios.get(
-            `${import.meta.env.VITE_API_URL}/marketplaceProducts`,
-            {
-              headers: {
-                Authorization:
-                  `Bearer ${localStorage.getItem("accessToken")}`,
-              }
-            }
-          );
+          await api.get(
+            `${import.meta.env.VITE_API_URL}/marketplaceProducts`);
 
 
         setMarketPlaceProducts(
