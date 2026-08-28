@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PaymentModal from "../Components/PaymentModal";
 import { Heart } from "lucide-react";
+import api from "../api/axios"
 
 const Marketplace = () => {
 

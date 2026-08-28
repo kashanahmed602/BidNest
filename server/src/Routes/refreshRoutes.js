@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router();
 
-const { refreshToken } = require('../Controller/refreshController');
+const { refreshAccessToken } = require('../Controller/refreshToken');
 
 router.post("/refresh-token", refreshAccessToken);
 
