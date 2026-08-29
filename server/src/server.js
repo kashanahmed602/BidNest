@@ -30,6 +30,16 @@ io.on("connection", (socket) => {
     });
 });
 
+io.on("connection", (socket) => {
+    console.log("User Connected: ", socket.id);
+
+    socket.on("joinUser", (userId) => {
+        socket.join(userId);
+
+        console.log(`User ${userId} joined room: ${socket.id}`);
+    });
+});
+
 server.listen(PORT, () => {
     console.log(`Server is Running on Port ${PORT}`);
     startAuctionScheduler();

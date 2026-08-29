@@ -6,7 +6,7 @@ const authLimiter = rateLimit({
 
     message: {
         success: false,
-        messsage: "Too many attempts. Please Try Agai Later"
+        messsage: "Too many attempts. Please Try Again Later"
     },
 
     standardHeaders: true,

@@ -12,7 +12,7 @@ const PendingProducts = () => {
     });
 
     alert(`Product ${status}`);
-    window.location.reload(true);
+    // window.location.reload(true);
     }catch(error){
       alert(error);
     }

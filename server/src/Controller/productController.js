@@ -129,6 +129,14 @@ const updateStatusProducts = async (req, res) => {
             });
         }
 
+        const io = req.app.get("io");
+
+        io.to(product.userId.toString()).emit("statusUpdate", {
+            productId: product._id,
+            message: `Your product "${product.name}" has been ${status}.`,
+            status: status
+        })
+
         res.status(200).json({
             success: true,
             message: `Product ${status} Successfully`,
