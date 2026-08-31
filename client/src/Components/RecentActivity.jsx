@@ -72,11 +72,13 @@ const RecentActivity = () => {
     };
 
     socket.on("statusUpdate", handleStatusUpdate);
+    socket.on("auctionStatusUpdate", handleStatusUpdate);
 
 
     return () => {
       socket.off("connect", joinUserRoom);
       socket.off("statusUpdate", handleStatusUpdate);
+      socket.off("auctionStatusUpdate", handleStatusUpdate);
     };
 
   }, []);

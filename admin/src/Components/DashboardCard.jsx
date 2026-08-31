@@ -5,32 +5,34 @@ import {
   XCircle,
 } from "lucide-react";
 
-const cards = [
+
+
+const DashboardCards = ({ pendingUsers, pendingProducts, approvedProducts, rejectedProducts }) => {
+
+  const cards = [
   {
     title: "Pending Users",
-    value: 12,
+    value: pendingUsers.length,
     icon: <Users size={32} className="text-yellow-400" />,
   },
   {
     title: "Pending Products",
-    value: 25,
+    value: pendingProducts.length,
     icon: <Package size={32} className="text-orange-400" />,
   },
   {
     title: "Approved Products",
-    value: 180,
+    value: approvedProducts.length,
     icon: <CheckCircle size={32} className="text-green-400" />,
   },
   {
     title: "Rejected Products",
-    value: 8,
+    value: rejectedProducts.length,
     icon: <XCircle size={32} className="text-red-400" />,
   },
 
   
 ];
-
-const DashboardCards = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 

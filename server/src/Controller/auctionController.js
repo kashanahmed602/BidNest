@@ -103,6 +103,14 @@ const updateAuction = async (req, res) => {
             });
         }
 
+        const io = req.app.get("io");
+
+        io.to(updateAuction.sellerId.toString()).emit("auctionStatusUpdate", {
+            auctionId: updateAuction._id,
+            message: `Your auction "${updateAuction.name}" has been ${approvalStatus}.`,
+            status: approvalStatus
+        });
+
         res.status(201).json({
             success: true,
             message: "Auction Updated Successfully",

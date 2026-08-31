@@ -1,6 +1,38 @@
 import SidebarLayout from "../Layout/SidebarLayout";
+import axios from 'axios'
+import { useState, useEffect } from 'react'
 
 const ApprovedProducts = () => {
+
+  const [approvedProducts, setApprovedProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await axios.get('http://localhost:3000/api/v1/productDashboard', {
+        
+          headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}
+        
+      })
+
+      const allProducts = response.data.products || [];
+      const allApprovedProducts = allProducts.filter(product => product.status === "approved");
+
+      setApprovedProducts(allApprovedProducts)
+    }
+
+    fetchProducts();
+  },[])
+
+  const deleteProducts = async (id) => {
+    try{
+      const deleteProduct = await axios.delete(`http://localhost:3000/api/v1/productDeleted/${id}`)
+
+      alert("Product Deleted Successfully");
+      window.location.reload(true)
+    }catch(error){
+      alert(error.message)
+    }
+  }
   return (
     <SidebarLayout>
 
@@ -17,7 +49,7 @@ const ApprovedProducts = () => {
             <tr className="text-slate-400 border-b border-slate-700">
 
               <th className="pb-3">Product</th>
-              <th className="pb-3">Seller</th>
+              {/* <th className="pb-3">Seller</th> */}
               <th className="pb-3">Category</th>
               <th className="pb-3">Status</th>
               <th className="pb-3">Action</th>
@@ -26,31 +58,44 @@ const ApprovedProducts = () => {
 
           </thead>
 
+
           <tbody>
+          {approvedProducts.length > 0 ? (
+            approvedProducts.map((product) => (
 
-            <tr className="border-b border-slate-800 hover:bg-slate-800 transition">
+            <tr key={product._id} className="border-b border-slate-800 hover:bg-slate-800 transition">
 
-              <td className="py-4 text-white">
-                iPhone 15 Pro
-              </td>
+              <div className="flex items-center gap-3">
 
-              <td className="text-slate-300">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+
+                <span className="text-white font-semibold">
+                  {product.name}
+                </span>
+
+              </div>
+
+              {/* <td className="text-slate-300">
                 Ahmed
-              </td>
+              </td> */}
 
               <td className="text-slate-300">
-                Mobile
+                {product.category}
               </td>
 
               <td>
                 <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm">
-                  Approved
+                  {product.status}
                 </span>
               </td>
 
               <td>
 
-                <button className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white transition">
+                <button onClick={()=> deleteProducts(product._id)} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white transition">
                   Remove
                 </button>
 
@@ -58,35 +103,19 @@ const ApprovedProducts = () => {
 
             </tr>
 
-            <tr className="border-b border-slate-800 hover:bg-slate-800 transition">
+             ))
 
-              <td className="py-4 text-white">
-                Dell XPS 15
-              </td>
-
-              <td className="text-slate-300">
-                Ali
-              </td>
-
-              <td className="text-slate-300">
-                Laptop
-              </td>
-
-              <td>
-                <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm">
-                  Approved
-                </span>
-              </td>
-
-              <td>
-
-                <button className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white transition">
-                  Remove
-                </button>
-
-              </td>
+          ) : (
+            <tr>
+                  <td
+                    colSpan="4"
+                    className="text-center py-8 text-slate-400"
+                  >
+                    No Pending Users
+                  </td>
 
             </tr>
+          )}
 
           </tbody>
 
