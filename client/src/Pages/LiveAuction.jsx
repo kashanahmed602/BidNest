@@ -1,9 +1,8 @@
 import SidebarLayout from "../Layout/SidebarLayout";
-import axios from "axios";
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import { socket } from "../socket";
 
 const LiveAuctions = () => {
 
@@ -114,42 +113,22 @@ const LiveAuctions = () => {
   // SOCKET: listen for bidPlaced events
   // ==========================================
   useEffect(() => {
-    let socket;
-    try{
-      const apiUrl = import.meta.env.VITE_API_URL;
-      let origin;
-      if (apiUrl) {
-        try {
-          origin = new URL(apiUrl).origin;
-        } catch (e) {
-          origin = window.location.origin;
-        }
-      } else {
-        origin = window.location.origin;
-      }
+    const handleBidPlaced = (data) => {
+      console.log("socket received bidPlaced:", data);
+      const { auctionId, currentBid, bidderName, bidderId } = data;
+      setLiveAuctions(prev => prev.map(a => a._id === auctionId ? {
+        ...a,
+        currentBid: currentBid,
+        lastBidderName: bidderName,
+        lastBidderId: bidderId ? String(bidderId) : null
+      } : a));
+    };
 
-      socket = io(origin, { transports: ["websocket"] });
-      // expose for debugging across tabs
-      try { window.__auctionSocket = socket } catch(e) {}
-
-      socket.on("bidPlaced", (data) => {
-        console.log("socket received bidPlaced:", data);
-        const { auctionId, currentBid, bidderName, bidderId } = data;
-        setLiveAuctions(prev => prev.map(a => a._id === auctionId ? {
-          ...a,
-          currentBid: currentBid,
-          lastBidderName: bidderName,
-          lastBidderId: bidderId ? String(bidderId) : null
-        } : a));
-
-      });
-    }catch(err){
-      console.warn("Socket init failed:", err);
-    }
+    socket.on("bidPlaced", handleBidPlaced);
 
     return () => {
-      if(socket && socket.disconnect) socket.disconnect();
-    }
+      socket.off("bidPlaced", handleBidPlaced);
+    };
   }, []);
 
 

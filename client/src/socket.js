@@ -13,5 +13,8 @@ try {
 }
 
 export const socket = io(origin, {
-  transports: ["websocket"],
+  transports: ["polling", "websocket"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 2000,
 });

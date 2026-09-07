@@ -3,7 +3,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
 const app = express();
-const allowedOrigins = [
+const allowedOrigins = new Set([
     "http://localhost:5173",
     "http://localhost:5174",
     "https://kas-bidnest.vercel.app",
@@ -11,11 +11,20 @@ const allowedOrigins = [
         .split(",")
         .map((origin) => origin.trim())
         .filter(Boolean)
-];
+]);
 
 app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.has(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error("Origin is not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 204
 }));
 
 app.use(cookieParser());
